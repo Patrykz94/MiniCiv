@@ -1,0 +1,10 @@
+﻿  Config.cpp
+  Debug.cpp
+  Game.cpp
+  Main.cpp
+  Map.cpp
+  PerlinNoise.cpp
+  Generating code
+  All 928 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Finished generating code
+  MiniCiv.vcxproj -> G:\Documents\Programming\MiniCiv\MiniCiv\Release\MiniCiv.exe
