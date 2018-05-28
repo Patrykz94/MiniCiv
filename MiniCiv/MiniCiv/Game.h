@@ -1,32 +1,33 @@
 #pragma once
 
-#include <SFML/Audio.hpp>
+#include <memory>
+#include <string>
 #include <SFML/Graphics.hpp>
-#include "Map.h"
+
+#include "StateMachine.h"
+#include "AssetManager.h"
+#include "InputManager.h"
+
+struct GameData
+{
+	StateMachine machine;
+	sf::RenderWindow window;
+	AssetManager assets;
+	InputManager input;
+};
+
+typedef std::shared_ptr<GameData> GameDataRef;
 
 class Game
 {
 public:
-	Game(sf::RenderWindow& window, sf::Clock& clock, bool& VSyncState);
-	void Go();
+	Game(int width, int height, std::string title);
+
 private:
-	void ComposeFrame();
-	void UpdateModel(float dt);
-	/************************/
-	/* User Functions       */
-	/************************/
-private:
-	sf::RenderWindow& window;
-	sf::Clock& clock;
-	bool& VSync;
-	/************************/
-	/* User Variables       */
-	/************************/
-	Debug debug;
-	Config config = { "Settings\\config.txt" };
-	sf::Font font;
-	Map world = { window, debug, config };
-	sf::Vector2i lastMousePressAt = { 0, 0 };
-	bool drawFps;
-	float LPressTime = 0.0f;
+	const float dt = 1.0f / 60.0f;
+	sf::Clock _clock;
+
+	GameDataRef _data = std::make_shared<GameData>();
+
+	void Run();
 };

@@ -1,81 +1,45 @@
 #include "Game.h"
 
-Game::Game(sf::RenderWindow & window, sf::Clock& clock, bool& VSyncState)
-	:
-	window(window),
-	clock(clock),
-	VSync(VSyncState)
+Game::Game(int width, int height, std::string title)
 {
-	font.loadFromFile("Data\\Fonts\\arial.ttf");
-	if (config.Get(Config::Option::DebugFPS) == 1)
-	{
-		drawFps = true;
-	}
-	else
-	{
-		drawFps = false;
-	}
-	// Check if VSync should be enabled
-	if (config.Get(Config::Option::Vsync) == 1)
-	{
-		VSync = true;
-	}
-	else
-	{
-		VSync = false;
-	}
-	// update VSync setting
-	window.setVerticalSyncEnabled(VSync);
+	_data->window.create(sf::VideoMode(width, height), title, sf::Style::Close || sf::Style::Titlebar);
+
+	// add first state when game starts
+
+	this->Run();
 }
 
-void Game::Go()
+void Game::Run()
 {
-	// Clear screen
-	window.clear();
+	float newTime, frameTime, interpolation;
 
-	// Time measuring
-	sf::Time elapsed = clock.restart();
-	float dt = elapsed.asSeconds();
+	float currentTime = this->_clock.getElapsedTime().asSeconds();
+	float accumulator = 0.0f;
 
-	// Process game logics
-	UpdateModel(dt);
-
-	// Create Graphics
-	ComposeFrame();
-
-	// Update the window
-	window.display();
-}
-
-void Game::UpdateModel(float dt)
-{
-	// update the debug object
-	debug.Update(dt);
-
-	// process map scroll
-	if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && window.hasFocus())
+	while (this->_data->window.isOpen())
 	{
-		sf::Vector2i mousePos = sf::Mouse::getPosition();
-		if (LPressTime > 0.15f || (LPressTime > 0.0f && lastMousePressAt != mousePos))
+		this->_data->machine.ProcessStateChanges();
+		
+		newTime = this->_clock.getElapsedTime().asSeconds();
+		frameTime = newTime - currentTime;
+
+		if (frameTime > 0.25f)
 		{
-			world.MoveView(lastMousePressAt - mousePos);
+			frameTime = 0.25f;
 		}
-		LPressTime += dt;
-		lastMousePressAt = mousePos;
-	}
-	else
-	{
-		// if mouse released, reset time back to 0
-		LPressTime = 0;
-	}
-}
 
-void Game::ComposeFrame()
-{
-	// Displaying graphics goes here
-	world.Draw();
-	if (drawFps)
-	{
-		debug.DrawFPS(window);
+		currentTime = newTime;
+		accumulator += frameTime;
+
+		while (accumulator >= dt)
+		{
+			this->_data->machine.GetActiveState()->HandleInput();
+			this->_data->machine.GetActiveState()->Update(dt);
+
+			accumulator -= dt;
+		}
+
+		interpolation = accumulator / dt;
+		this->_data->machine.GetActiveState()->Draw(interpolation);
 	}
 }
