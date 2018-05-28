@@ -7,6 +7,7 @@
 #include "StateMachine.h"
 #include "AssetManager.h"
 #include "InputManager.h"
+#include "DEFINITIONS.h"
 
 struct GameData
 {
