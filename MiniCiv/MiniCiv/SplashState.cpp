@@ -3,6 +3,8 @@
 #include <sstream>
 #include <iostream>
 
+#include "MainMenuState.h"
+
 SplashState::SplashState(GameDataRef data)
 	:
 	_data(data)
@@ -11,7 +13,9 @@ SplashState::SplashState(GameDataRef data)
 void SplashState::Init()
 {
 	this->_data->assets.LoadTexture("Splash State Background", SPLASH_SCENE_BACKGROUD_FILEPATH);
-	_background.setTexture(this->_data->assets.GetTexture("Splash State Background"));
+
+	this->_background.setTexture(this->_data->assets.GetTexture("Splash State Background"));
+	this->_background.setPosition(((sf::Vector2f)this->_data->window.getSize() - sf::Vector2f(this->_background.getGlobalBounds().width, this->_background.getGlobalBounds().height)) / 2.0f);
 }
 
 void SplashState::HandleInput()
@@ -32,15 +36,12 @@ void SplashState::Update(float dt)
 	if (this->_clock.getElapsedTime().asSeconds() > SPLASH_STATE_SHOW_TIME)
 	{
 		// Switch to main menu
-		std::cout << "Go to Main Menu" << std::endl;
+		this->_data->machine.AddState(StateRef(new MainMenuState(_data)), true);
 	}
 }
 
 void SplashState::Draw(float dt)
 {
-	sf::Vector2f backgroundSize = sf::Vector2f(this->_background.getGlobalBounds().width, this->_background.getGlobalBounds().height);
-	this->_background.setPosition(((sf::Vector2f)this->_data->window.getSize() - backgroundSize) / 2.0f);
-
 	this->_data->window.clear(sf::Color::Color(38, 38, 38));
 
 	this->_data->window.draw(this->_background);

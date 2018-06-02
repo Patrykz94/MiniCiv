@@ -7,7 +7,7 @@
 class SplashState : public State
 {
 public:
-	SplashState(GameDataRef);
+	SplashState(GameDataRef data);
 
 	void Init();
 
@@ -17,8 +17,6 @@ public:
 
 private:
 	GameDataRef _data;
-
 	sf::Clock _clock;
-	
 	sf::Sprite _background;
 };
