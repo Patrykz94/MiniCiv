@@ -2,7 +2,7 @@
 
 Debug::Debug()
 {
-	font.loadFromFile("Data\\Fonts\\arial.ttf");
+	font.loadFromFile(FONT_ARIAL_PATH);
 }
 
 void Debug::Update(float dt)

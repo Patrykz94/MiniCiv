@@ -6,6 +6,8 @@
 #define FONT_ARIAL_PATH "Resources/Fonts/arial.ttf"
 #define FONT_HELVETICA_PATH "Resources/Fonts/HELR45W.ttf"
 
+#define CONFIG_DIR "Settings/Config.txt"
+
 #define SPLASH_STATE_SHOW_TIME 3
 
 #define SPLASH_SCENE_BACKGROUD_FILEPATH "Resources/Images/Splash Background.png"

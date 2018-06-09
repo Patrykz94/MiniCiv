@@ -10,7 +10,7 @@ Map::Map(sf::RenderWindow& window, Debug & debug, const Config& config)
 	window(window)
 {
 	// load textures
-	tileSprite.loadFromFile("Data\\Textures\\mapTiles60x60.bmp");
+	tileSprite.loadFromFile("Resources\\Textures\\mapTiles60x60.bmp");
 
 	// load user configs
 	int mSize = config.Get(Config::Option::MapSize);
