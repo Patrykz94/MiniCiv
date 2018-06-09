@@ -3,6 +3,8 @@
 #include <sstream>
 #include <iostream>
 
+#include "GameState.h"
+
 MainMenuState::MainMenuState(GameDataRef data)
 	:
 	_data(data)
@@ -62,12 +64,12 @@ void MainMenuState::HandleInput()
 
 		if (this->_data->input.IsSpriteClicked(this->_generateMapButton, sf::Mouse::Left, this->_data->window))
 		{
-			std::cout << "Go to Game Screen" << std::endl;
+			this->_data->machine.AddState(StateRef(new GameState(_data)), true);
 		}
 
 		if (this->_data->input.IsSpriteClicked(this->_optionsButton, sf::Mouse::Left, this->_data->window))
 		{
-			std::cout << "Go to Options Menu" << std::endl;
+			std::cout << "Show Options Menu" << std::endl;
 		}
 
 		if (this->_data->input.IsSpriteClicked(this->_exitButton, sf::Mouse::Left, this->_data->window))
