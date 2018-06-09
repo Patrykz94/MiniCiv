@@ -24,23 +24,23 @@ void Game::Run()
 		newTime = this->_clock.getElapsedTime().asSeconds();
 		frameTime = newTime - currentTime;
 
-		if (frameTime > 0.25f)
+		/* if (frameTime > 0.25f)
 		{
 			frameTime = 0.25f;
-		}
+		} */
 
 		currentTime = newTime;
-		accumulator += frameTime;
+		//accumulator += frameTime;
 
-		while (accumulator >= dt)
-		{
+		//while (accumulator >= dt)
+		//{
 			this->_data->machine.GetActiveState()->HandleInput();
-			this->_data->machine.GetActiveState()->Update(dt);
+			this->_data->machine.GetActiveState()->Update(frameTime);
 
-			accumulator -= dt;
-		}
+		//	accumulator -= dt;
+		//}
 
-		interpolation = accumulator / dt;
-		this->_data->machine.GetActiveState()->Draw(interpolation);
+		//interpolation = accumulator / dt;
+		this->_data->machine.GetActiveState()->Draw(frameTime);
 	}
 }
