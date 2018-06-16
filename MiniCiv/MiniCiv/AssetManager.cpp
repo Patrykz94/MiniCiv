@@ -6,13 +6,13 @@ void AssetManager::LoadTexture(std::string name, std::string fileName)
 
 	if (tex.loadFromFile(fileName))
 	{
-		this->_textures[name] = tex;
+		textures[name] = tex;
 	}
 }
 
 sf::Texture & AssetManager::GetTexture(std::string name)
 {
-	return this->_textures.at(name);
+	return textures.at(name);
 }
 
 void AssetManager::LoadFont(std::string name, std::string fileName)
@@ -21,11 +21,11 @@ void AssetManager::LoadFont(std::string name, std::string fileName)
 
 	if (font.loadFromFile(fileName))
 	{
-		this->_fonts[name] = font;
+		fonts[name] = font;
 	}
 }
 
 sf::Font & AssetManager::GetFont(std::string name)
 {
-	return this->_fonts.at(name);
+	return fonts.at(name);
 }

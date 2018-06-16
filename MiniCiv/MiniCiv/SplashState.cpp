@@ -5,46 +5,49 @@
 
 #include "MainMenuState.h"
 
-SplashState::SplashState(GameDataRef data)
+SplashState::SplashState(GameDataRef dataIn)
 	:
-	_data(data)
+	data(dataIn)
 {}
 
 void SplashState::Init()
 {
-	this->_data->assets.LoadTexture("Splash State Background", SPLASH_SCENE_BACKGROUD_FILEPATH);
+	data->assets.LoadTexture("splashStateBackground", SPLASH_SCENE_BACKGROUD_FILEPATH);
+	// Load all images and textures and fonts
+	data->assets.LoadTexture("Main Menu Button", MAIN_MENU_BUTTON_PATH);
+	data->assets.LoadFont("menuFont", FONT_HELVETICA_PATH);
 
-	this->_background.setTexture(this->_data->assets.GetTexture("Splash State Background"));
-	this->_background.setPosition(((sf::Vector2f)this->_data->window.getSize() - sf::Vector2f(this->_background.getGlobalBounds().width, this->_background.getGlobalBounds().height)) / 2.0f);
+	background.setTexture(data->assets.GetTexture("splashStateBackground"));
+	background.setPosition(((sf::Vector2f)data->window.getSize() - sf::Vector2f(background.getGlobalBounds().width, background.getGlobalBounds().height)) / 2.0f);
 }
 
 void SplashState::HandleInput()
 {
 	sf::Event event;
 
-	while (this->_data->window.pollEvent(event))
+	while (data->window.pollEvent(event))
 	{
 		if (sf::Event::Closed == event.type)
 		{
-			this->_data->window.close();
+			data->window.close();
 		}
 	}
 }
 
 void SplashState::Update(float dt)
 {
-	if (this->_clock.getElapsedTime().asSeconds() > SPLASH_STATE_SHOW_TIME)
+	if (clock.getElapsedTime().asSeconds() > SPLASH_STATE_SHOW_TIME)
 	{
 		// Switch to main menu
-		this->_data->machine.AddState(StateRef(new MainMenuState(_data)), true);
+		data->machine.AddState(StateRef(new MainMenuState(data)), true);
 	}
 }
 
 void SplashState::Draw(float dt)
 {
-	this->_data->window.clear(sf::Color::Color(38, 38, 38));
+	data->window.clear(sf::Color::Color(38, 38, 38));
 
-	this->_data->window.draw(this->_background);
+	data->window.draw(background);
 
-	this->_data->window.display();
+	data->window.display();
 }

@@ -3,25 +3,25 @@
 
 Game::Game(int width, int height, std::string title)
 {
-	_data->window.create(sf::VideoMode(width, height), title, sf::Style::None);
+	data->window.create(sf::VideoMode(width, height), title, sf::Style::None);
 
-	_data->machine.AddState(StateRef(new SplashState(this->_data)));
+	data->machine.AddState(StateRef(new SplashState(data)));
 
-	this->Run();
+	Run();
 }
 
 void Game::Run()
 {
-	float newTime, frameTime, interpolation;
+	float newTime, frameTime;// , interpolation;
 
-	float currentTime = this->_clock.getElapsedTime().asSeconds();
+	float currentTime = clock.getElapsedTime().asSeconds();
 	float accumulator = 0.0f;
 
-	while (this->_data->window.isOpen())
+	while (data->window.isOpen())
 	{
-		this->_data->machine.ProcessStateChanges();
+		data->machine.ProcessStateChanges();
 		
-		newTime = this->_clock.getElapsedTime().asSeconds();
+		newTime = clock.getElapsedTime().asSeconds();
 		frameTime = newTime - currentTime;
 
 		/* if (frameTime > 0.25f)
@@ -34,13 +34,13 @@ void Game::Run()
 
 		//while (accumulator >= dt)
 		//{
-			this->_data->machine.GetActiveState()->HandleInput();
-			this->_data->machine.GetActiveState()->Update(frameTime);
+			data->machine.GetActiveState()->HandleInput();
+			data->machine.GetActiveState()->Update(frameTime);
 
 		//	accumulator -= dt;
 		//}
 
 		//interpolation = accumulator / dt;
-		this->_data->machine.GetActiveState()->Draw(frameTime);
+		data->machine.GetActiveState()->Draw(frameTime);
 	}
 }

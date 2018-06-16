@@ -16,7 +16,7 @@ public:
 	void Draw(float dt);
 
 private:
-	GameDataRef _data;
-	sf::Clock _clock;
-	sf::Sprite _background;
+	GameDataRef data;
+	sf::Clock clock;
+	sf::Sprite background;
 };
