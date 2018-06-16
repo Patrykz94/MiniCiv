@@ -38,7 +38,17 @@ void SplashState::Update(float dt)
 {
 	if (clock.getElapsedTime().asSeconds() > SPLASH_STATE_SHOW_TIME)
 	{
+		// Create game window with given resolution
+		std::cout << "Create game window" << std::endl;
+		sf::VideoMode mode = sf::VideoMode::getDesktopMode();
+		// default values
+		int scrnWidth = (int)((float)mode.width * 0.75f);
+		int scrnHeight = (int)((float)mode.height * 0.75f);
+		// create window
+		data->window.create(sf::VideoMode(scrnWidth, scrnHeight, mode.bitsPerPixel), GAME_TITLE, sf::Style::Close);
+
 		// Switch to main menu
+		std::cout << "Load main menu" << std::endl;
 		data->machine.AddState(StateRef(new MainMenuState(data)), true);
 	}
 }
