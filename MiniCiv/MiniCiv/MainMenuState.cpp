@@ -8,17 +8,7 @@
 MainMenuState::MainMenuState(GameDataRef dataIn)
 	:
 	data(dataIn)
-{
-	// get full screen modes
-	std::vector<sf::VideoMode> modes = sf::VideoMode::getFullscreenModes();
-	for (std::size_t i = 0; i < modes.size(); ++i)
-	{
-		sf::VideoMode mode = modes[i];
-		std::cout	<< "Mode #" << i << ": "
-					<< mode.width << "x" << mode.height << " - "
-					<< mode.bitsPerPixel << " bpp" << std::endl;
-	}
-}
+{}
 
 void MainMenuState::Init()
 {
@@ -30,13 +20,17 @@ void MainMenuState::Init()
 	title.setPosition((float)data->window.getSize().x / 2.0f - title.getGlobalBounds().width / 2.0f, title.getGlobalBounds().height * 0.1f);
 
 	// Set size and positions for buttons
-	sf::Vector2f buttonSize = sf::Vector2f((sf::Vector2f)data->assets.GetTexture("Main Menu Button").getSize());
-	sf::Vector2f buttonPos = sf::Vector2f((float)data->window.getSize().x / 2.0f - buttonSize.x / 2.0f, (float)title.getGlobalBounds().height * 1.2f);
+	int buttonFontSize = (int)((data->window.getSize().y - title.getGlobalBounds().height - title.getPosition().y) * 0.5f / numButtons);
+	buttonGenerateMap.SetFontSize(buttonFontSize);
+	buttonOptions.SetFontSize(buttonFontSize);
+	buttonExit.SetFontSize(buttonFontSize);
+
+	sf::Vector2f buttonPos = sf::Vector2f(title.getPosition().x, (float)title.getGlobalBounds().height + title.getPosition().y + (float)buttonFontSize / 5.0f);
 
 	// set button positions
-	buttonGenerateMap.SetPosition(buttonPos + sf::Vector2f(0.0f, buttonSize.y * 0 * 1.2f));
-	buttonOptions.SetPosition(buttonPos + sf::Vector2f(0.0f, buttonSize.y * 1 * 1.2f));
-	buttonExit.SetPosition(buttonPos + sf::Vector2f(0.0f, buttonSize.y * 2 * 1.2f));
+	buttonGenerateMap.SetPosition(buttonPos + sf::Vector2f(0.0f, buttonFontSize * 0 / 0.5f));
+	buttonOptions.SetPosition(buttonPos + sf::Vector2f(0.0f, buttonFontSize * 1 / 0.5f));
+	buttonExit.SetPosition(buttonPos + sf::Vector2f(0.0f, buttonFontSize * 2 / 0.5f));
 }
 
 void MainMenuState::HandleInput()
@@ -55,12 +49,13 @@ void MainMenuState::HandleInput()
 			{
 				if (buttonGenerateMap.IsSelected())
 				{
+					std::cout << "Go to game and generate map" << std::endl;
 					data->machine.AddState(StateRef(new GameState(data)), true);
 					break;
 				}
 				else if (buttonOptions.IsSelected())
 				{
-					std::cout << "Show Options Menu" << std::endl;
+					std::cout << "Show options menu" << std::endl;
 					break;
 				}
 				else if (buttonExit.IsSelected())

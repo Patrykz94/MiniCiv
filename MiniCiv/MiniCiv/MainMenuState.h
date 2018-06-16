@@ -15,7 +15,6 @@ public:
 	void HandleInput();
 	void Update(float dt);
 	void Draw(float dt);
-
 private:
 	GameDataRef data;
 
@@ -26,4 +25,7 @@ private:
 	MenuOption buttonGenerateMap = { MenuOption::Type::Button, "Generate Map", data };
 	MenuOption buttonOptions = { MenuOption::Type::Button, "Options", data, false };
 	MenuOption buttonExit = { MenuOption::Type::Button, "Exit", data };
+
+	// number of buttons on this menu
+	int numButtons = 3;
 };

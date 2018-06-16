@@ -25,6 +25,7 @@ public:
 	{
 		SetPosition(pos.x, pos.y);
 	}
+	void SetFontSize(int size);
 	void Draw();
 private:
 	// get _data structure
@@ -33,7 +34,6 @@ private:
 	Type type;
 
 	sf::Font menuFont;
-	static constexpr unsigned int fontSize = 80;
 	sf::Text optionText;
 	std::vector<std::string> options;
 

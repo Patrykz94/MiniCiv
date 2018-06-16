@@ -7,7 +7,7 @@ MenuOption::MenuOption(MenuOption::Type typeIn, std::string text, GameDataRef& d
 	available(available)
 {
 	menuFont = data->assets.GetFont("menuFont");
-	optionText = sf::Text(text, menuFont, fontSize);
+	optionText = sf::Text(text, menuFont, 80);
 }
 
 MenuOption::MenuOption(const MenuOption & in)
@@ -37,6 +37,11 @@ bool MenuOption::IsSelected()
 void MenuOption::SetPosition(float x, float y)
 {
 	optionText.setPosition(x, y);
+}
+
+void MenuOption::SetFontSize(int size)
+{
+	optionText.setCharacterSize(size);
 }
 
 void MenuOption::Draw()

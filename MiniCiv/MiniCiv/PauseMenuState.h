@@ -25,4 +25,7 @@ private:
 	MenuOption buttonResume = { MenuOption::Type::Button, "Resume Game", data };
 	MenuOption buttonOptions = { MenuOption::Type::Button, "Options", data, false };
 	MenuOption buttonMainMenu = { MenuOption::Type::Button, "Exit to Main Menu", data };
+
+	// number of buttons on this menu
+	int numButtons = 3;
 };

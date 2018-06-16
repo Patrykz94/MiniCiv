@@ -47,7 +47,7 @@ void GameState::HandleInput()
 			{
 			case sf::Keyboard::Escape:
 				// go to main menu
-				std::cout << "Go to Main Menu" << std::endl;
+				std::cout << "Go to pause menu" << std::endl;
 				data->machine.AddState(StateRef(new PauseMenuState(data)), false);
 				break;
 			}
