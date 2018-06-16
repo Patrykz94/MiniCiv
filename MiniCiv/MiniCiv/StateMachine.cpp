@@ -31,7 +31,7 @@ void StateMachine::ProcessStateChanges()
 	{
 		if (!this->_states.empty())
 		{
-			if (!this->_isReplacing)
+			if (this->_isReplacing)
 			{
 				this->_states.pop();
 			}
