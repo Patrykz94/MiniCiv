@@ -136,6 +136,8 @@
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="MainMenuState.cpp" />
     <ClCompile Include="Map.cpp" />
+    <ClCompile Include="MenuOption.cpp" />
+    <ClCompile Include="PauseMenuState.cpp" />
     <ClCompile Include="PerlinNoise.cpp" />
     <ClCompile Include="SplashState.cpp" />
     <ClCompile Include="StateMachine.cpp" />
@@ -150,6 +152,8 @@
     <ClInclude Include="InputManager.h" />
     <ClInclude Include="MainMenuState.h" />
     <ClInclude Include="Map.h" />
+    <ClInclude Include="MenuOption.h" />
+    <ClInclude Include="PauseMenuState.h" />
     <ClInclude Include="PerlinNoise.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="SplashState.h" />

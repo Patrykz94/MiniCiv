@@ -3,45 +3,44 @@
 #include <sstream>
 #include <iostream>
 
-GameState::GameState(GameDataRef data)
-	:
-	_data(data)
-{
-	//sf::VideoMode mode = sf::VideoMode::getFullscreenModes()[0];
-	//_data->window.create(sf::VideoMode(mode.width, mode.height), "MiniCiv");
+#include "PauseMenuState.h"
 
+GameState::GameState(GameDataRef dataIn)
+	:
+	data(dataIn)
+{
 	// check if displaying fps
-	if (_config.Get(Config::Option::DebugFPS) == 1)
+	if (config.Get(Config::Option::DebugFPS) == 1)
 		drawFps = true;
 	else
 		drawFps = false;
 
 	// check if vsync enabled
-	if (_config.Get(Config::Option::Vsync) == 1)
+	if (config.Get(Config::Option::Vsync) == 1)
 		VSync = true;
 	else
 		VSync = false;
 
 	// update vsync
-	_data->window.setVerticalSyncEnabled(VSync);
+	data->window.setVerticalSyncEnabled(VSync);
 }
 
 void GameState::Init()
 {
-	this->_font = this->_data->assets.GetFont("Helvetica Font");
+	font = data->assets.GetFont("menuFont");
 }
 
 void GameState::HandleInput()
 {
 	sf::Event event;
 
-	while (this->_data->window.pollEvent(event))
+	while (data->window.pollEvent(event))
 	{
 		switch (event.type)
 		{
 		case sf::Event::Closed:
 			// close window and exit
-			this->_data->window.close();
+			data->window.close();
 			break;
 		case sf::Event::KeyReleased:
 			switch (event.key.code)
@@ -49,6 +48,7 @@ void GameState::HandleInput()
 			case sf::Keyboard::Escape:
 				// go to main menu
 				std::cout << "Go to Main Menu" << std::endl;
+				data->machine.AddState(StateRef(new PauseMenuState(data)), false);
 				break;
 			}
 			break;
@@ -59,10 +59,10 @@ void GameState::HandleInput()
 void GameState::Update(float dt)
 {
 	// update debug object
-	_debug.Update(dt);
+	debug.Update(dt);
 
 	// process map scroll
-	if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && _data->window.hasFocus())
+	if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && data->window.hasFocus())
 	{
 		sf::Vector2i mousePos = sf::Mouse::getPosition();
 		if (LPressTime > 0.15f || (LPressTime > 0.0f && lastMousePressAt != mousePos))
@@ -81,13 +81,13 @@ void GameState::Update(float dt)
 
 void GameState::Draw(float dt)
 {
-	this->_data->window.clear(_backgroundColor);
+	data->window.clear(backgroundColor);
 
 	world.Draw();
 	if (drawFps)
 	{
-		_debug.DrawFPS(_data->window);
+		debug.DrawFPS(data->window);
 	}
 
-	this->_data->window.display();
+	data->window.display();
 }

@@ -9,7 +9,7 @@
 class GameState : public State
 {
 public:
-	GameState(GameDataRef data);
+	GameState(GameDataRef dataIn);
 
 	void Init();
 
@@ -18,16 +18,16 @@ public:
 	void Draw(float dt);
 
 private:
-	GameDataRef _data;
-	sf::Font _font;
-	sf::Clock _clock;
-	sf::Color _backgroundColor = sf::Color::Color(38, 38, 38);
-	Debug _debug;
-	Config _config = { CONFIG_DIR };
+	GameDataRef data;
+	sf::Font font;
+	sf::Clock clock;
+	sf::Color backgroundColor = sf::Color::Color(38, 38, 38);
+	Debug debug;
+	Config config = { CONFIG_DIR };
 
 	bool VSync;
 	bool drawFps;
-	Map world = { _data->window, _debug, _config };
+	Map world = { data->window, debug, config };
 	
 	sf::Vector2i lastMousePressAt = { 0, 0 };
 	float LPressTime = 0.0f;
