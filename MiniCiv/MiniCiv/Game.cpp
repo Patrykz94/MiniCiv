@@ -1,9 +1,12 @@
 #include "Game.h"
 #include "SplashState.h"
 
-Game::Game(int width, int height, std::string title)
+Game::Game(std::string title)
 {
-	data->window.create(sf::VideoMode(width, height), title, sf::Style::None);
+	// get desktop resolution
+	sf::VideoMode desktop = sf::VideoMode::getDesktopMode();
+
+	data->window.create(sf::VideoMode(desktop.width/3, desktop.height/3, desktop.bitsPerPixel), title, sf::Style::None);
 
 	data->machine.AddState(StateRef(new SplashState(data)));
 

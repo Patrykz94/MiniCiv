@@ -12,12 +12,18 @@ SplashState::SplashState(GameDataRef dataIn)
 
 void SplashState::Init()
 {
-	data->assets.LoadTexture("splashStateBackground", SPLASH_SCENE_BACKGROUD_FILEPATH);
 	// Load all images and textures and fonts
+	data->assets.LoadTexture("splashStateBackground", SPLASH_SCENE_BACKGROUD_FILEPATH);
 	data->assets.LoadTexture("Main Menu Button", MAIN_MENU_BUTTON_PATH);
 	data->assets.LoadFont("menuFont", FONT_HELVETICA_PATH);
 
 	background.setTexture(data->assets.GetTexture("splashStateBackground"));
+
+	// Rescale splash screen background
+	float scaleFactorX = data->window.getSize().x / background.getGlobalBounds().width;
+	float scaleFactorY = data->window.getSize().y / background.getGlobalBounds().height;
+	float scaleFactor = std::min(scaleFactorX, scaleFactorY);
+	background.setScale(scaleFactor, scaleFactor);
 	background.setPosition(((sf::Vector2f)data->window.getSize() - sf::Vector2f(background.getGlobalBounds().width, background.getGlobalBounds().height)) / 2.0f);
 }
 
