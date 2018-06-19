@@ -3,7 +3,7 @@
 #include <sstream>
 #include <iostream>
 
-#include "GameState.h"
+#include "GraphicsMenuState.h"
 
 OptionsMenuState::OptionsMenuState(GameDataRef dataIn)
 	:
@@ -56,6 +56,7 @@ void OptionsMenuState::HandleInput()
 				else if (buttonGraphics.IsSelected())
 				{
 					std::cout << "Show graphics option" << std::endl;
+					data->machine.AddState(StateRef(new GraphicsMenuState(data)), false);
 					break;
 				}
 				else if (buttonBack.IsSelected())

@@ -23,7 +23,7 @@ private:
 
 	// Buttons visible in main menu
 	MenuOption buttonInterface = { MenuOption::Type::Button, "Gameplay", data, false };
-	MenuOption buttonGraphics = { MenuOption::Type::Button, "Graphics", data, false };
+	MenuOption buttonGraphics = { MenuOption::Type::Button, "Graphics", data };
 	MenuOption buttonBack = { MenuOption::Type::Button, "Back", data };
 
 	// number of buttons on this menu
