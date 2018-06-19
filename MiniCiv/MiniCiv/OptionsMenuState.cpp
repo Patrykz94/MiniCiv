@@ -1,18 +1,16 @@
-#include "PauseMenuState.h"
+#include "OptionsMenuState.h"
 
 #include <sstream>
 #include <iostream>
 
 #include "GameState.h"
-#include "MainMenuState.h"
-#include "OptionsMenuState.h"
 
-PauseMenuState::PauseMenuState(GameDataRef dataIn)
+OptionsMenuState::OptionsMenuState(GameDataRef dataIn)
 	:
 	data(dataIn)
 {}
 
-void PauseMenuState::Init()
+void OptionsMenuState::Init()
 {
 	title.setTexture(data->assets.GetTexture("splashStateBackground"));
 
@@ -23,19 +21,20 @@ void PauseMenuState::Init()
 
 	// Set size and positions for buttons
 	int buttonFontSize = (int)((data->window.getSize().y - title.getGlobalBounds().height - title.getPosition().y) * 0.5f / numButtons);
-	buttonResume.SetFontSize(buttonFontSize);
-	buttonOptions.SetFontSize(buttonFontSize);
-	buttonMainMenu.SetFontSize(buttonFontSize);
+
+	buttonInterface.SetFontSize(buttonFontSize);
+	buttonGraphics.SetFontSize(buttonFontSize);
+	buttonBack.SetFontSize(buttonFontSize);
 
 	sf::Vector2f buttonPos = sf::Vector2f(title.getPosition().x, (float)title.getGlobalBounds().height + title.getPosition().y + (float)buttonFontSize / 5.0f);
 
 	// set button positions
-	buttonResume.SetPosition(buttonPos + sf::Vector2f(0.0f, buttonFontSize * 0 / 0.5f));
-	buttonOptions.SetPosition(buttonPos + sf::Vector2f(0.0f, buttonFontSize * 1 / 0.5f));
-	buttonMainMenu.SetPosition(buttonPos + sf::Vector2f(0.0f, buttonFontSize * 2 / 0.5f));
+	buttonInterface.SetPosition(buttonPos + sf::Vector2f(0.0f, buttonFontSize * 0 / 0.5f));
+	buttonGraphics.SetPosition(buttonPos + sf::Vector2f(0.0f, buttonFontSize * 1 / 0.5f));
+	buttonBack.SetPosition(buttonPos + sf::Vector2f(0.0f, buttonFontSize * 2 / 0.5f));
 }
 
-void PauseMenuState::HandleInput()
+void OptionsMenuState::HandleInput()
 {
 	sf::Event event;
 
@@ -49,23 +48,20 @@ void PauseMenuState::HandleInput()
 		case sf::Event::MouseButtonReleased:
 			if (event.mouseButton.button == 0)
 			{
-				if (buttonResume.IsSelected())
+				if (buttonInterface.IsSelected())
 				{
-					std::cout << "Return to map" << std::endl;
-					data->machine.RemoveState();
+					std::cout << "Show interface options" << std::endl;
 					break;
 				}
-				else if (buttonOptions.IsSelected())
+				else if (buttonGraphics.IsSelected())
 				{
-					std::cout << "Show options menu" << std::endl;
-					data->machine.AddState(StateRef(new OptionsMenuState(data)), false);
+					std::cout << "Show graphics option" << std::endl;
 					break;
 				}
-				else if (buttonMainMenu.IsSelected())
+				else if (buttonBack.IsSelected())
 				{
-					std::cout << "Go back to main menu" << std::endl;
+					std::cout << "Go back to menu" << std::endl;
 					data->machine.RemoveState();
-					data->machine.AddState(StateRef(new MainMenuState(data)), true);
 					break;
 				}
 			}
@@ -74,10 +70,10 @@ void PauseMenuState::HandleInput()
 	}
 }
 
-void PauseMenuState::Update(float dt)
+void OptionsMenuState::Update(float dt)
 {}
 
-void PauseMenuState::Draw(float dt)
+void OptionsMenuState::Draw(float dt)
 {
 	// clear window
 	data->window.clear(backgroundColor);
@@ -86,9 +82,9 @@ void PauseMenuState::Draw(float dt)
 	data->window.draw(title);
 
 	// draw buttons
-	buttonResume.Draw();
-	buttonOptions.Draw();
-	buttonMainMenu.Draw();
+	buttonInterface.Draw();
+	buttonGraphics.Draw();
+	buttonBack.Draw();
 
 	// display frame
 	data->window.display();

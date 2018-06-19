@@ -23,7 +23,7 @@ private:
 
 	// Buttons visible in main menu
 	MenuOption buttonGenerateMap = { MenuOption::Type::Button, "Generate Map", data };
-	MenuOption buttonOptions = { MenuOption::Type::Button, "Options", data, false };
+	MenuOption buttonOptions = { MenuOption::Type::Button, "Options", data };
 	MenuOption buttonExit = { MenuOption::Type::Button, "Exit", data };
 
 	// number of buttons on this menu

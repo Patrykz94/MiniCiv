@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include "GameState.h"
+#include "OptionsMenuState.h"
 
 MainMenuState::MainMenuState(GameDataRef dataIn)
 	:
@@ -56,6 +57,7 @@ void MainMenuState::HandleInput()
 				else if (buttonOptions.IsSelected())
 				{
 					std::cout << "Show options menu" << std::endl;
+					data->machine.AddState(StateRef(new OptionsMenuState(data)), false);
 					break;
 				}
 				else if (buttonExit.IsSelected())

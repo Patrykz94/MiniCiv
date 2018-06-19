@@ -5,10 +5,10 @@
 #include "Game.h"
 #include "MenuOption.h"
 
-class PauseMenuState : public State
+class OptionsMenuState : public State
 {
 public:
-	PauseMenuState(GameDataRef dataIn);
+	OptionsMenuState(GameDataRef dataIn);
 
 	void Init();
 
@@ -22,9 +22,9 @@ private:
 	sf::Sprite title;
 
 	// Buttons visible in main menu
-	MenuOption buttonResume = { MenuOption::Type::Button, "Resume Game", data };
-	MenuOption buttonOptions = { MenuOption::Type::Button, "Options", data };
-	MenuOption buttonMainMenu = { MenuOption::Type::Button, "Exit to Main Menu", data };
+	MenuOption buttonInterface = { MenuOption::Type::Button, "Gameplay", data, false };
+	MenuOption buttonGraphics = { MenuOption::Type::Button, "Graphics", data, false };
+	MenuOption buttonBack = { MenuOption::Type::Button, "Back", data };
 
 	// number of buttons on this menu
 	int numButtons = 3;
