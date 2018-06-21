@@ -1,18 +1,16 @@
-#include "PauseMenuState.h"
+#include "SettingsMenuState.h"
 
 #include <sstream>
 #include <iostream>
 
-#include "GameState.h"
-#include "MainMenuState.h"
-#include "SettingsMenuState.h"
+#include "GraphicsMenuState.h"
 
-PauseMenuState::PauseMenuState(GameDataRef dataIn)
+SettingsMenuState::SettingsMenuState(GameDataRef dataIn)
 	:
 	data(dataIn)
 {}
 
-void PauseMenuState::Init()
+void SettingsMenuState::Init()
 {
 	title.setTexture(data->assets.GetTexture("splashStateBackground"));
 
@@ -21,16 +19,16 @@ void PauseMenuState::Init()
 	title.setScale(titleScaleFactor, titleScaleFactor);
 	title.setPosition((float)data->window.getSize().x / 2.0f - title.getGlobalBounds().width / 2.0f, title.getGlobalBounds().height * 0.1f);
 
-	buttonResume = MenuButton("Resume Game", getButtonPosition(0, buttonsPosition), getButtonSize(), data);
-	buttonSettings = MenuButton("Settings", getButtonPosition(1, buttonsPosition), getButtonSize(), data);
-	buttonMainMenu = MenuButton("Back to Main Menu", getButtonPosition(-1, buttonsPosition), getButtonSize(), data);
-
 	buttonAreaRect = sf::RectangleShape(sf::Vector2f((float)getButtonSize().x + 20.0f, (float)data->window.getSize().y - title.getPosition().y * 2.0f - title.getGlobalBounds().height - (float)getButtonSize().y * 1.2f + 20.0f));
 	buttonAreaRect.setPosition(sf::Vector2f((float)getButtonPosition(0, buttonsPosition).x - 10.0f, (float)getButtonPosition(0, buttonsPosition).y - 10.0f));
 	buttonAreaRect.setFillColor(sf::Color(20, 20, 20));
+
+	buttonInterface = MenuButton("Interface", getButtonPosition(0, buttonsPosition), getButtonSize(), data, false);
+	buttonGraphics = MenuButton("Graphics", getButtonPosition(1, buttonsPosition), getButtonSize(), data);
+	buttonBack = MenuButton("Back", getButtonPosition(-1, buttonsPosition), getButtonSize(), data);
 }
 
-void PauseMenuState::HandleInput()
+void SettingsMenuState::HandleInput()
 {
 	sf::Event event;
 
@@ -44,21 +42,22 @@ void PauseMenuState::HandleInput()
 		case sf::Event::MouseButtonReleased:
 			if (event.mouseButton.button == 0)
 			{
-				if (buttonResume.IsSelected())
+				if (buttonInterface.IsSelected())
 				{
-					std::cout << "Return to map" << std::endl;
-					data->machine.RemoveState();
+					std::cout << "Show interface options" << std::endl;
+					break;
 				}
-				else if (buttonSettings.IsSelected())
+				else if (buttonGraphics.IsSelected())
 				{
-					std::cout << "Show options menu" << std::endl;
-					data->machine.AddState(StateRef(new SettingsMenuState(data)), false);
+					std::cout << "Show graphics option" << std::endl;
+					data->machine.AddState(StateRef(new GraphicsMenuState(data)), false);
+					break;
 				}
-				else if (buttonMainMenu.IsSelected())
+				else if (buttonBack.IsSelected())
 				{
-					std::cout << "Go back to main menu" << std::endl;
+					std::cout << "Go back to menu" << std::endl;
 					data->machine.RemoveState();
-					data->machine.AddState(StateRef(new MainMenuState(data)), true);
+					break;
 				}
 			}
 			break;
@@ -66,19 +65,19 @@ void PauseMenuState::HandleInput()
 	}
 }
 
-void PauseMenuState::Update(float dt)
+void SettingsMenuState::Update(float dt)
 {
-	if (buttonResume.GetButtonRect().contains(sf::Mouse::getPosition(data->window))) buttonResume.Select();
-	else buttonResume.Deselect();
+	if (buttonInterface.GetButtonRect().contains(sf::Mouse::getPosition(data->window))) buttonInterface.Select();
+	else buttonInterface.Deselect();
 
-	if (buttonSettings.GetButtonRect().contains(sf::Mouse::getPosition(data->window))) buttonSettings.Select();
-	else buttonSettings.Deselect();
+	if (buttonGraphics.GetButtonRect().contains(sf::Mouse::getPosition(data->window))) buttonGraphics.Select();
+	else buttonGraphics.Deselect();
 
-	if (buttonMainMenu.GetButtonRect().contains(sf::Mouse::getPosition(data->window))) buttonMainMenu.Select();
-	else buttonMainMenu.Deselect();
+	if (buttonBack.GetButtonRect().contains(sf::Mouse::getPosition(data->window))) buttonBack.Select();
+	else buttonBack.Deselect();
 }
 
-void PauseMenuState::Draw(float dt)
+void SettingsMenuState::Draw(float dt)
 {
 	// clear window
 	data->window.clear(backgroundColor);
@@ -89,22 +88,22 @@ void PauseMenuState::Draw(float dt)
 	data->window.draw(buttonAreaRect);
 
 	// draw buttons
-	buttonResume.Draw();
-	buttonSettings.Draw();
-	buttonMainMenu.Draw();
+	buttonInterface.Draw();
+	buttonGraphics.Draw();
+	buttonBack.Draw();
 
 	// display frame
 	data->window.display();
 }
 
-sf::Vector2i PauseMenuState::getButtonSize()
+sf::Vector2i SettingsMenuState::getButtonSize()
 {
 	int width = (int)((float)data->window.getSize().x * 0.44f);
 	int height = (int)((float)data->window.getSize().y / 16.0f);
 	return sf::Vector2i(width, height);
 }
 
-sf::Vector2i PauseMenuState::getButtonPosition(int buttonNum, int side)
+sf::Vector2i SettingsMenuState::getButtonPosition(int buttonNum, int side)
 {
 	int x;
 	int y;

@@ -15,7 +15,7 @@ void SplashState::Init()
 	// Load all images and textures and fonts
 	data->assets.LoadTexture("splashStateBackground", SPLASH_SCENE_BACKGROUD_FILEPATH);
 	data->assets.LoadTexture("Main Menu Button", MAIN_MENU_BUTTON_PATH);
-	data->assets.LoadFont("menuFont", FONT_HELVETICA_PATH);
+	data->assets.LoadFont(MENU_FONT_NAME, FONT_HELVETICA_PATH);
 
 	background.setTexture(data->assets.GetTexture("splashStateBackground"));
 

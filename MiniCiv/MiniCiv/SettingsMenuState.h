@@ -4,12 +4,11 @@
 #include "State.h"
 #include "Game.h"
 #include "MenuButton.h"
-#include "MenuSelection.h"
 
-class GraphicsMenuState : public State
+class SettingsMenuState : public State
 {
 public:
-	GraphicsMenuState(GameDataRef dataIn);
+	SettingsMenuState(GameDataRef dataIn);
 
 	void Init();
 
@@ -22,23 +21,15 @@ private:
 	sf::Color backgroundColor = sf::Color::Color(38, 38, 38);
 	sf::Sprite title;
 
-	// Full screen mode names
-	std::vector<std::string> modeNames;
-
 	// 1 = Left side, 2 = Middle, 3 = Right side
-	const int buttonsPositionLeft = 1;
-	// 1 = Left side, 2 = Middle, 3 = Right side
-	const int buttonsPositionRight = 3;
+	const int buttonsPosition = 2;
 
 	// Button pannel
 	sf::RectangleShape buttonAreaRect;
-	sf::RectangleShape buttonAreaRect2;
 
 	// Buttons visible in main menu
-	MenuSelection selectionDisplayMode = { data };
-	MenuSelection selectionResolution = { data };
-	MenuSelection selectionVSync = { data };
-	MenuButton buttonApply = { data };
+	MenuButton buttonInterface = { data };
+	MenuButton buttonGraphics = { data };
 	MenuButton buttonBack = { data };
 
 	// helper functions
