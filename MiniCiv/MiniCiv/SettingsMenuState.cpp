@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include "GraphicsMenuState.h"
+#include "InterfaceMenuState.h"
 
 SettingsMenuState::SettingsMenuState(GameDataRef dataIn)
 	:
@@ -23,9 +24,11 @@ void SettingsMenuState::Init()
 	buttonAreaRect.setPosition(sf::Vector2f((float)getButtonPosition(0, buttonsPosition).x - 10.0f, (float)getButtonPosition(0, buttonsPosition).y - 10.0f));
 	buttonAreaRect.setFillColor(sf::Color(20, 20, 20));
 
-	buttonInterface = MenuButton("Interface", getButtonPosition(0, buttonsPosition), getButtonSize(), data, false);
+	buttonInterface = MenuButton("Interface", getButtonPosition(0, buttonsPosition), getButtonSize(), data);
 	buttonGraphics = MenuButton("Graphics", getButtonPosition(1, buttonsPosition), getButtonSize(), data);
 	buttonBack = MenuButton("Back", getButtonPosition(-1, buttonsPosition), getButtonSize(), data);
+
+	renderRes = data->window.getSize();
 }
 
 void SettingsMenuState::HandleInput()
@@ -45,6 +48,7 @@ void SettingsMenuState::HandleInput()
 				if (buttonInterface.IsSelected())
 				{
 					std::cout << "Show interface options" << std::endl;
+					data->machine.AddState(StateRef(new InterfaceMenuState(data)), false);
 					break;
 				}
 				else if (buttonGraphics.IsSelected())
@@ -67,6 +71,9 @@ void SettingsMenuState::HandleInput()
 
 void SettingsMenuState::Update(float dt)
 {
+	// If resolution has changed, re-initialize the menu
+	if (renderRes != data->window.getSize()) data->machine.AddState(StateRef(new SettingsMenuState(data)), true);;
+
 	if (buttonInterface.GetButtonRect().contains(sf::Mouse::getPosition(data->window))) buttonInterface.Select();
 	else buttonInterface.Deselect();
 
@@ -79,21 +86,24 @@ void SettingsMenuState::Update(float dt)
 
 void SettingsMenuState::Draw(float dt)
 {
-	// clear window
-	data->window.clear(backgroundColor);
+	// Only draw UI if the resolution is correct
+	if (renderRes == data->window.getSize()) {
+		// clear window
+		data->window.clear(backgroundColor);
 
-	// draw title/logo
-	data->window.draw(title);
+		// draw title/logo
+		data->window.draw(title);
 
-	data->window.draw(buttonAreaRect);
+		data->window.draw(buttonAreaRect);
 
-	// draw buttons
-	buttonInterface.Draw();
-	buttonGraphics.Draw();
-	buttonBack.Draw();
+		// draw buttons
+		buttonInterface.Draw();
+		buttonGraphics.Draw();
+		buttonBack.Draw();
 
-	// display frame
-	data->window.display();
+		// display frame
+		data->window.display();
+	}
 }
 
 sf::Vector2i SettingsMenuState::getButtonSize()

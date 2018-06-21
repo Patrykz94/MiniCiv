@@ -10,10 +10,7 @@ public:
 		MapSize,
 		MapWidth,
 		MapHeight,
-		MapWrapping,
-		Vsync,
-		DebugFPS,
-		DebugGridCoordinates
+		MapWrapping
 	};
 public:
 	Config(const std::string& filename);
@@ -23,7 +20,4 @@ private:
 	int mapWidth = 0;
 	int mapHeight = 0;
 	int mapWrapping = 1;
-	int VSync = 1;
-	int debugFPS = 0;
-	int debugGridCoords = 0;
 };

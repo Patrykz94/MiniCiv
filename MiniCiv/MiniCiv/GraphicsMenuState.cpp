@@ -8,7 +8,32 @@
 GraphicsMenuState::GraphicsMenuState(GameDataRef dataIn)
 	:
 	data(dataIn)
-{}
+{
+	// Set selection options and defaults
+	displayOptionNames = { "Fullscreen", "Window", "Borderless Window" };
+	displayOptions = { "fullscreen", "window", "borderlesswindow" };
+	if (data->settings.GetScreenModeName() == "fullscreen") defaultDisplayOption = 0;
+	else if (data->settings.GetScreenModeName() == "window") defaultDisplayOption = 1;
+	else if (data->settings.GetScreenModeName() == "borderlesswindow") defaultDisplayOption = 2;
+
+	modes = sf::VideoMode::getFullscreenModes();
+	int modeNum = 0;
+	defaultModeOption = 0;
+	for (sf::VideoMode& mode : modes)
+	{
+		if (sf::Vector2i(mode.width, mode.height) == data->settings.GetScreenResolution())
+		{
+			defaultModeOption = modeNum;
+		}
+		modeNames.emplace_back(std::to_string(mode.width) + "x" + std::to_string(mode.height));
+		modeNum++;
+	}
+
+	VsyncOptionNames = { "Yes", "No" };
+	VsyncOptions = { true, false };
+	if (data->settings.GetScreenVsync()) defaultVsyncOption = 0;
+	else defaultVsyncOption = 1;
+}
 
 void GraphicsMenuState::Init()
 {
@@ -27,25 +52,15 @@ void GraphicsMenuState::Init()
 	buttonAreaRect2 = sf::RectangleShape(sf::Vector2f((float)getButtonSize().x + 20.0f, (float)data->window.getSize().y - title.getPosition().y * 2.0f - title.getGlobalBounds().height - (float)getButtonSize().y * 1.2f + 20.0f));
 	buttonAreaRect2.setPosition(sf::Vector2f((float)getButtonPosition(0, buttonsPositionRight).x - 10.0f, (float)getButtonPosition(0, buttonsPositionRight).y - 10.0f));
 	buttonAreaRect2.setFillColor(sf::Color(20, 20, 20));
-
-	// Set selection options and defaults
-	std::vector<std::string> displayOptions = { "Fullscreen", "Window", "Borderless Window" };
-	int defaultDisplayOption = 0;
-	std::vector<sf::VideoMode> modes = sf::VideoMode::getFullscreenModes();
-	for (sf::VideoMode& mode : modes)
-	{
-		modeNames.emplace_back(std::to_string(mode.width) + "x" + std::to_string(mode.height));
-	}
-	int defaultModeOption = 0;
-	std::vector<std::string> VsyncOptions = { "Yes", "No" };
-	int defaultVSyncOption = 0;
 	
 	// Initialize our buttons and options
-	selectionDisplayMode = MenuSelection("Display Mode", getButtonPosition(0, buttonsPositionLeft), displayOptions, getButtonPosition(0, buttonsPositionRight), getButtonSize(), data, defaultDisplayOption, false);
+	selectionDisplayMode = MenuSelection("Display Mode", getButtonPosition(0, buttonsPositionLeft), displayOptionNames, getButtonPosition(0, buttonsPositionRight), getButtonSize(), data, defaultDisplayOption, false);
 	selectionResolution = MenuSelection("Resolution", getButtonPosition(1, buttonsPositionLeft), modeNames, getButtonPosition(1, buttonsPositionRight), getButtonSize(), data, defaultModeOption, true);
-	selectionVSync = MenuSelection("Vsync Enabled", getButtonPosition(2, buttonsPositionLeft), VsyncOptions, getButtonPosition(2, buttonsPositionRight), getButtonSize(), data, defaultVSyncOption, false);
-	buttonApply = MenuButton("Apply", getButtonPosition(-1, buttonsPositionRight), getButtonSize(), data, false);
+	selectionVsync = MenuSelection("Vsync Enabled", getButtonPosition(2, buttonsPositionLeft), VsyncOptionNames, getButtonPosition(2, buttonsPositionRight), getButtonSize(), data, defaultVsyncOption, false);
+	buttonApply = MenuButton("Apply", getButtonPosition(-1, buttonsPositionRight), getButtonSize(), data);
 	buttonBack = MenuButton("Back", getButtonPosition(-1, buttonsPositionLeft), getButtonSize(), data);
+
+	renderRes = data->window.getSize();
 }
 
 void GraphicsMenuState::HandleInput()
@@ -89,23 +104,58 @@ void GraphicsMenuState::HandleInput()
 					break;
 				}
 				////////////////////////////////////////////////////////
-				else if (selectionVSync.IsSelectedLeft())
+				else if (selectionVsync.IsSelectedLeft())
 				{
 					std::cout << "Move Left" << std::endl;
-					selectionVSync.MoveLeft();
+					selectionVsync.MoveLeft();
 					break;
 				}
-				else if (selectionVSync.IsSelectedRight())
+				else if (selectionVsync.IsSelectedRight())
 				{
 					std::cout << "Move Right" << std::endl;
-					selectionVSync.MoveRight();
+					selectionVsync.MoveRight();
 					break;
 				}
 				////////////////////////////////////////////////////////
 				else if (buttonApply.IsSelected())
 				{
 					std::cout << "Apply Settings" << std::endl;
-					//data->machine.RemoveState();
+					bool newDisplayModeRequired = false;
+					if (displayOptions[selectionDisplayMode.GetSelectedOption()] != data->settings.GetScreenModeName()) newDisplayModeRequired = true;
+					bool newResolutionRequired = false;
+					if (modes[selectionResolution.GetSelectedOption()].width != data->settings.GetScreenResolution().x
+						|| modes[selectionResolution.GetSelectedOption()].height != data->settings.GetScreenResolution().y) newResolutionRequired = true;
+					bool newVsyncRequired = false;
+					if (VsyncOptions[selectionVsync.GetSelectedOption()] != data->settings.GetScreenVsync()) newVsyncRequired = true;
+
+					if (newDisplayModeRequired || newResolutionRequired)
+					{
+						int style = data->settings.GetScreenMode();
+						if (newDisplayModeRequired) style = data->settings.GetScreenModeFromName(displayOptions[selectionDisplayMode.GetSelectedOption()]);
+
+						sf::Vector2i res = data->settings.GetScreenResolution();
+						if (newResolutionRequired) res = sf::Vector2i(modes[selectionResolution.GetSelectedOption()].width, modes[selectionResolution.GetSelectedOption()].height);
+						
+						data->window.create(sf::VideoMode(res.x, res.y), GAME_TITLE, style);
+						data->settings.SetScreenMode(displayOptions[selectionDisplayMode.GetSelectedOption()]);
+						data->settings.SetScreenResolution(res);
+						newDisplayModeRequired = false;
+						newResolutionRequired = false;
+
+						data->window.setVerticalSyncEnabled(VsyncOptions[selectionVsync.GetSelectedOption()]);
+						data->settings.SetScreenVsync(VsyncOptions[selectionVsync.GetSelectedOption()]);
+						newVsyncRequired = false;
+					}
+
+					if (newVsyncRequired)
+					{
+						data->window.setVerticalSyncEnabled(VsyncOptions[selectionVsync.GetSelectedOption()]);
+						data->settings.SetScreenVsync(VsyncOptions[selectionVsync.GetSelectedOption()]);
+						newVsyncRequired = false;
+					}
+
+					// TODO: Make all UI states recalculate their dimensions after a resolution change
+
 					break;
 				}
 				else if (buttonBack.IsSelected())
@@ -123,6 +173,9 @@ void GraphicsMenuState::HandleInput()
 
 void GraphicsMenuState::Update(float dt)
 {
+	// If resolution has changed, re-initialize the menu
+	if (renderRes != data->window.getSize()) data->machine.AddState(StateRef(new GraphicsMenuState(data)), true);;
+
 	// Selections highlight code
 	if (selectionDisplayMode.GetLeftRect().contains(sf::Mouse::getPosition(data->window))) selectionDisplayMode.SelectLeft();
 	else selectionDisplayMode.DeselectLeft();
@@ -134,10 +187,10 @@ void GraphicsMenuState::Update(float dt)
 	if (selectionResolution.GetRightRect().contains(sf::Mouse::getPosition(data->window))) selectionResolution.SelectRight();
 	else selectionResolution.DeselectRight();
 
-	if (selectionVSync.GetLeftRect().contains(sf::Mouse::getPosition(data->window))) selectionVSync.SelectLeft();
-	else selectionVSync.DeselectLeft();
-	if (selectionVSync.GetRightRect().contains(sf::Mouse::getPosition(data->window))) selectionVSync.SelectRight();
-	else selectionVSync.DeselectRight();
+	if (selectionVsync.GetLeftRect().contains(sf::Mouse::getPosition(data->window))) selectionVsync.SelectLeft();
+	else selectionVsync.DeselectLeft();
+	if (selectionVsync.GetRightRect().contains(sf::Mouse::getPosition(data->window))) selectionVsync.SelectRight();
+	else selectionVsync.DeselectRight();
 
 	// Buttons highlight code
 	if (buttonApply.GetButtonRect().contains(sf::Mouse::getPosition(data->window))) buttonApply.Select();
@@ -149,24 +202,27 @@ void GraphicsMenuState::Update(float dt)
 
 void GraphicsMenuState::Draw(float dt)
 {
-	// clear window
-	data->window.clear(backgroundColor);
+	// Only draw UI if the resolution is correct
+	if (renderRes == data->window.getSize()) {
+		// clear window
+		data->window.clear(backgroundColor);
 
-	// draw title/logo
-	data->window.draw(title);
+		// draw title/logo
+		data->window.draw(title);
 
-	data->window.draw(buttonAreaRect);
-	data->window.draw(buttonAreaRect2);
+		data->window.draw(buttonAreaRect);
+		data->window.draw(buttonAreaRect2);
 
-	// draw buttons
-	selectionDisplayMode.Draw();
-	selectionResolution.Draw();
-	selectionVSync.Draw();
-	buttonApply.Draw();
-	buttonBack.Draw();
+		// draw buttons
+		selectionDisplayMode.Draw();
+		selectionResolution.Draw();
+		selectionVsync.Draw();
+		buttonApply.Draw();
+		buttonBack.Draw();
 
-	// display frame
-	data->window.display();
+		// display frame
+		data->window.display();
+	}
 }
 
 sf::Vector2i GraphicsMenuState::getButtonSize()

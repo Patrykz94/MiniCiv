@@ -35,4 +35,7 @@ private:
 	// helper functions
 	sf::Vector2i getButtonPosition(int buttonNum, int side = 2);
 	sf::Vector2i getButtonSize();
+
+	// Window resolution at the moment of menu initialization
+	sf::Vector2u renderRes;
 };

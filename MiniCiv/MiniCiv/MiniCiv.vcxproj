@@ -134,11 +134,13 @@
     <ClCompile Include="GameState.cpp" />
     <ClCompile Include="GraphicsMenuState.cpp" />
     <ClCompile Include="InputManager.cpp" />
+    <ClCompile Include="InterfaceMenuState.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="MainMenuState.cpp" />
     <ClCompile Include="Map.cpp" />
     <ClCompile Include="MenuButton.cpp" />
     <ClCompile Include="MenuSelection.cpp" />
+    <ClCompile Include="SettingsManager.cpp" />
     <ClCompile Include="SettingsMenuState.cpp" />
     <ClCompile Include="PauseMenuState.cpp" />
     <ClCompile Include="PerlinNoise.cpp" />
@@ -154,10 +156,12 @@
     <ClInclude Include="GameState.h" />
     <ClInclude Include="GraphicsMenuState.h" />
     <ClInclude Include="InputManager.h" />
+    <ClInclude Include="InterfaceMenuState.h" />
     <ClInclude Include="MainMenuState.h" />
     <ClInclude Include="Map.h" />
     <ClInclude Include="MenuButton.h" />
     <ClInclude Include="MenuSelection.h" />
+    <ClInclude Include="SettingsManager.h" />
     <ClInclude Include="SettingsMenuState.h" />
     <ClInclude Include="PauseMenuState.h" />
     <ClInclude Include="PerlinNoise.h" />

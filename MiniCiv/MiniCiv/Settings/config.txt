@@ -7,13 +7,3 @@ Normal
 0
 [Map Wrapping]
 TRUE
-
-// Graphics Options
-[VSync]
-TRUE
-
-// Debug Options
-[Show FPS]
-TRUE
-[Show GridCoordinates]
-FALSE

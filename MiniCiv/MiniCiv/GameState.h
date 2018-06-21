@@ -25,9 +25,7 @@ private:
 	Debug debug;
 	Config config = { CONFIG_DIR };
 
-	bool VSync;
-	bool drawFps;
-	Map world = { data->window, debug, config };
+	Map world = { data, debug, config };
 	
 	sf::Vector2i lastMousePressAt = { 0, 0 };
 	float LPressTime = 0.0f;

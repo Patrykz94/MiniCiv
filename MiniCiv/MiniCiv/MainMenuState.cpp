@@ -27,6 +27,8 @@ void MainMenuState::Init()
 	buttonAreaRect = sf::RectangleShape(sf::Vector2f((float)getButtonSize().x + 20.0f, (float)data->window.getSize().y - title.getPosition().y * 2.0f - title.getGlobalBounds().height - (float)getButtonSize().y * 1.2f + 20.0f));
 	buttonAreaRect.setPosition(sf::Vector2f((float)getButtonPosition(0, buttonsPosition).x - 10.0f, (float)getButtonPosition(0, buttonsPosition).y - 10.0f));
 	buttonAreaRect.setFillColor(sf::Color(20,20,20));
+
+	renderRes = data->window.getSize();
 }
 
 void MainMenuState::HandleInput()
@@ -68,6 +70,9 @@ void MainMenuState::HandleInput()
 
 void MainMenuState::Update(float dt)
 {
+	// If resolution has changed, re-initialize the menu
+	if (renderRes != data->window.getSize()) data->machine.AddState(StateRef(new MainMenuState(data)), true);;
+
 	if (buttonGenerateMap.GetButtonRect().contains(sf::Mouse::getPosition(data->window))) buttonGenerateMap.Select();
 	else buttonGenerateMap.Deselect();
 
@@ -80,26 +85,29 @@ void MainMenuState::Update(float dt)
 
 void MainMenuState::Draw(float dt)
 {
-	// clear window
-	data->window.clear(backgroundColor);
+	// Only draw UI if the resolution is correct
+	if (renderRes == data->window.getSize()) {
+		// clear window
+		data->window.clear(backgroundColor);
 
-	// draw title/logo
-	data->window.draw(title);
+		// draw title/logo
+		data->window.draw(title);
 
-	data->window.draw(buttonAreaRect);
+		data->window.draw(buttonAreaRect);
 
-	// draw buttons
-	buttonGenerateMap.Draw();
-	buttonSettings.Draw();
-	buttonExit.Draw();
-	
-	// display frame
-	data->window.display();
+		// draw buttons
+		buttonGenerateMap.Draw();
+		buttonSettings.Draw();
+		buttonExit.Draw();
+
+		// display frame
+		data->window.display();
+	}
 }
 
 sf::Vector2i MainMenuState::getButtonSize()
 {
-	int width = (int)((float)data->window.getSize().x * 0.43f);
+	int width = (int)((float)data->window.getSize().x * 0.44f);
 	int height = (int)((float)data->window.getSize().y / 16.0f);
 	return sf::Vector2i(width, height);
 }

@@ -62,45 +62,6 @@ Config::Config(const std::string& filename)
 					mapWrapping = 0;
 				}
 			}
-			else if (line == "[VSync]" || line == "[Vsync]" || line == "[vsync]" || line == "[VSYNC]")
-			{
-				std::string tmp;
-				config >> tmp;
-				if (tmp == "TRUE" || tmp == "True" || tmp == "true" || tmp == "1")
-				{
-					VSync = 1;
-				}
-				else if (tmp == "FALSE" || tmp == "False" || tmp == "false" || tmp == "0")
-				{
-					VSync = 0;
-				}
-			}
-			else if (line == "[Show FPS]" || line == "[show FPS]" || line == "[show fps]" || line == "[SHOW FPS]")
-			{
-				std::string tmp;
-				config >> tmp;
-				if (tmp == "TRUE" || tmp == "True" || tmp == "true" || tmp == "1")
-				{
-					debugFPS = 1;
-				}
-				else if (tmp == "FALSE" || tmp == "False" || tmp == "false" || tmp == "0")
-				{
-					debugFPS = 0;
-				}
-			}
-			else if (line == "[Show GridCoordinates]" || line == "[show gridcoordinates]" || line == "[SHOW GRIDCOORDINATES]")
-			{
-				std::string tmp;
-				config >> tmp;
-				if (tmp == "TRUE" || tmp == "True" || tmp == "true" || tmp == "1")
-				{
-					debugGridCoords = 1;
-				}
-				else if (tmp == "FALSE" || tmp == "False" || tmp == "false" || tmp == "0")
-				{
-					debugGridCoords = 0;
-				}
-			}
 		}
 	}
 }
@@ -117,12 +78,6 @@ int Config::Get(Option option) const
 		return mapHeight;
 	case Option::MapWrapping:
 		return mapWrapping;
-	case Option::Vsync:
-		return VSync;
-	case Option::DebugFPS:
-		return debugFPS;
-	case Option::DebugGridCoordinates:
-		return debugGridCoords;
 	default:
 		return 0;
 	}

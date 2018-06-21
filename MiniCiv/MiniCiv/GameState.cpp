@@ -8,22 +8,7 @@
 GameState::GameState(GameDataRef dataIn)
 	:
 	data(dataIn)
-{
-	// check if displaying fps
-	if (config.Get(Config::Option::DebugFPS) == 1)
-		drawFps = true;
-	else
-		drawFps = false;
-
-	// check if vsync enabled
-	if (config.Get(Config::Option::Vsync) == 1)
-		VSync = true;
-	else
-		VSync = false;
-
-	// update vsync
-	data->window.setVerticalSyncEnabled(VSync);
-}
+{}
 
 void GameState::Init()
 {
@@ -84,10 +69,8 @@ void GameState::Draw(float dt)
 	data->window.clear(backgroundColor);
 
 	world.Draw();
-	if (drawFps)
-	{
-		debug.DrawFPS(data->window);
-	}
+
+	if (data->settings.GetShowFPS()) debug.DrawFPS(data->window);
 
 	data->window.display();
 }

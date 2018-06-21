@@ -23,6 +23,8 @@ public:
 	void MoveLeft();
 	void MoveRight();
 
+	int GetSelectedOption() const;
+
 	void Draw();
 private:
 	GameDataRef & data;

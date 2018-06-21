@@ -46,12 +46,10 @@ void SplashState::Update(float dt)
 	{
 		// Create game window with given resolution
 		std::cout << "Create game window" << std::endl;
-		sf::VideoMode mode = sf::VideoMode::getDesktopMode();
-		// default values
-		int scrnWidth = (int)((float)mode.width * 0.75f);
-		int scrnHeight = (int)((float)mode.height * 0.75f);
 		// create window
-		data->window.create(sf::VideoMode(scrnWidth, scrnHeight, mode.bitsPerPixel), GAME_TITLE, sf::Style::Close);
+		sf::Vector2i res = data->settings.GetScreenResolution();
+		data->window.create(sf::VideoMode(res.x, res.y, sf::VideoMode::getDesktopMode().bitsPerPixel), GAME_TITLE, data->settings.GetScreenMode());
+		data->window.setVerticalSyncEnabled(data->settings.GetScreenVsync());
 
 		// Switch to main menu
 		std::cout << "Load main menu" << std::endl;

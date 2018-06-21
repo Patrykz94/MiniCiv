@@ -4,10 +4,10 @@
 #include <random>
 #include <assert.h>
 
-Map::Map(sf::RenderWindow& window, Debug & debug, const Config& config)
+Map::Map(GameDataRef& data, Debug & debug, const Config& config)
 	:
 	debug(debug),
-	window(window)
+	data(data)
 {
 	// load textures
 	tileSprite.loadFromFile("Resources\\Textures\\mapTiles60x60.bmp");
@@ -17,7 +17,6 @@ Map::Map(sf::RenderWindow& window, Debug & debug, const Config& config)
 	int mWidth = config.Get(Config::Option::MapWidth);
 	int mHeight = config.Get(Config::Option::MapHeight);
 	int mWrap = config.Get(Config::Option::MapWrapping);
-	int dGridCoords = config.Get(Config::Option::DebugGridCoordinates);
 	if (mWidth != 0 && mHeight != 0)
 	{
 		numColumns = mWidth;
@@ -52,17 +51,9 @@ Map::Map(sf::RenderWindow& window, Debug & debug, const Config& config)
 	{
 		allowWrappingEastWest = false;
 	}
-	if (dGridCoords == 1)
-	{
-		drawGridCoords = true;
-	}
-	else
-	{
-		drawGridCoords = false;
-	}
 	mapWidth = numColumns * tileSize;
 	mapHeight = numRows * tileSize;
-	mapPos = sf::Vector2i(mapWidth, mapHeight) / -2 + (sf::Vector2i)window.getSize() / 2;
+	mapPos = sf::Vector2i(mapWidth, mapHeight) / -2 + (sf::Vector2i)data->window.getSize() / 2;
 	// generate the map
 	GenerateMap(Type::Continents);
 }
@@ -77,14 +68,11 @@ void Map::Draw() const
 		sf::Vector2i gridPos = GridAtIndex(tIndex);
 		sf::Vector2i scrnPos = GridToScreen(gridPos);
 		// make sure tile is inside screen
-		if (sf::IntRect(scrnPos, sf::Vector2i(tileSize, tileSize)).intersects(sf::IntRect(sf::Vector2i(0,0), (sf::Vector2i)window.getSize())))
+		if (sf::IntRect(scrnPos, sf::Vector2i(tileSize, tileSize)).intersects(sf::IntRect(sf::Vector2i(0,0), (sf::Vector2i)data->window.getSize())))
 		{
 			// draw the tile
-			t.Draw(scrnPos, window);
-			if (drawGridCoords)
-			{
-				debug.DrawGridCoordinates(gridPos, scrnPos, window);
-			}
+			t.Draw(scrnPos, data->window);
+			if (data->settings.GetShowGridCoords()) debug.DrawGridCoordinates(gridPos, scrnPos, data->window);
 		}
 		tIndex++;
 	}
@@ -97,7 +85,7 @@ void Map::MoveView(const sf::Vector2i& deltaPos)
 	{
 		// if east-west wrapping is used, make sure to reset
 		// map position once it is moved too far in one disf::IntRecton
-		int scrnCenter = window.getSize().x/2;
+		int scrnCenter = data->window.getSize().x/2;
 		mapPos.x -= deltaPos.x;
 		if (mapPos.x + mapWidth / 2 < scrnCenter - mapWidth)
 		{
@@ -112,26 +100,26 @@ void Map::MoveView(const sf::Vector2i& deltaPos)
 	{
 		// if map width is less that screen width, lock map to the screen
 		// otherwise don't allow the view to go off the map instead	
-		if (mapWidth <= (int)window.getSize().x)
+		if (mapWidth <= (int)data->window.getSize().x)
 		{
-			mapPos.x = std::min(std::max(mapPos.x - deltaPos.x, 0), (int)window.getSize().x - mapWidth);
+			mapPos.x = std::min(std::max(mapPos.x - deltaPos.x, 0), (int)data->window.getSize().x - mapWidth);
 		}
 		else
 		{
-			mapPos.x = std::max(std::min(mapPos.x - deltaPos.x, 0), (int)window.getSize().x - mapWidth);
+			mapPos.x = std::max(std::min(mapPos.x - deltaPos.x, 0), (int)data->window.getSize().x - mapWidth);
 		}
 	}
 
 	// move the map vertically by the value provided
 	// if map height is less that screen height, lock map to the screen
 	// otherwise don't allow the view to go off the map instead
-	if (mapHeight <= (int)window.getSize().y)
+	if (mapHeight <= (int)data->window.getSize().y)
 	{
-		mapPos.y = std::min(std::max(mapPos.y - deltaPos.y, 0), (int)window.getSize().y - mapHeight);
+		mapPos.y = std::min(std::max(mapPos.y - deltaPos.y, 0), (int)data->window.getSize().y - mapHeight);
 	}
 	else
 	{
-		mapPos.y = std::max(std::min(mapPos.y - deltaPos.y, 0), (int)window.getSize().y - mapHeight);
+		mapPos.y = std::max(std::min(mapPos.y - deltaPos.y, 0), (int)data->window.getSize().y - mapHeight);
 	}
 }
 
@@ -143,11 +131,6 @@ bool Map::WrappingEastWest() const
 sf::Vector2i Map::Size() const
 {
 	return sf::Vector2i(numColumns, numRows);
-}
-
-void Map::SetDrawGridCoordsTo(bool option)
-{
-	drawGridCoords = option;
 }
 
 Map::Tile & Map::TileAt(sf::Vector2i gridPos)
@@ -176,7 +159,7 @@ sf::Vector2i Map::GridToScreen(const sf::Vector2i & gridPos) const
 	sf::Vector2i scrnPos = { gridPos.x * tileSize + mapPos.x, gridPos.y * tileSize + mapPos.y };
 
 	if (allowWrappingEastWest) {
-		int scrnCenter = window.getSize().x/2;
+		int scrnCenter = data->window.getSize().x/2;
 
 		if (scrnPos.x + tileSize / 2 < scrnCenter - mapWidth / 2)
 		{
@@ -197,7 +180,7 @@ sf::Vector2i Map::ScreenToGrid(const sf::Vector2i & scrnPos) const
 	sf::Vector2i gridPos = { (scrnPos.x - mapPos.x) / tileSize, (scrnPos.y - mapPos.y) / tileSize };
 
 	if (allowWrappingEastWest) {
-		int scrnCenter = window.getSize().x/2;
+		int scrnCenter = data->window.getSize().x/2;
 
 		if (scrnPos.x + tileSize / 2 < scrnCenter - mapWidth)
 		{

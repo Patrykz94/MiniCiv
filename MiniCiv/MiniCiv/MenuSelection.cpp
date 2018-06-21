@@ -284,6 +284,11 @@ void MenuSelection::MoveRight()
 	}
 }
 
+int MenuSelection::GetSelectedOption() const
+{
+	return currentSelectionID;
+}
+
 void MenuSelection::Draw()
 {
 	// Draw the labels frist

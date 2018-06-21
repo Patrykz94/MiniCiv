@@ -5,6 +5,7 @@
 #include <vector>
 #include "Debug.h"
 #include "Config.h"
+#include "Game.h"
 
 class Map
 {
@@ -47,12 +48,11 @@ public:
 		Count
 	};
 public:
-	Map(sf::RenderWindow& window, Debug& debug, const Config& config);
+	Map(GameDataRef& data, Debug& debug, const Config& config);
 	bool WrappingEastWest() const;
 	sf::Vector2i Size() const;
 	void Draw() const;
 	void MoveView(const sf::Vector2i& deltaPos);
-	void SetDrawGridCoordsTo(bool option);
 private:
 	// allows selecting the tile by supplying it's position on the grid
 	Tile & TileAt(sf::Vector2i gridPos);
@@ -65,11 +65,8 @@ private:
 	void GenerateMap(Type type = Type::Empty);
 	// elevate an area passed into this function
 	void ElevateArea(const std::vector<sf::Vector2i>& area);
-public:
-	// is drawing grid coordinates required?
-	bool drawGridCoords = true;
 private:
-	sf::RenderWindow& window;
+	GameDataRef& data;
 	// debug class
 	Debug& debug;
 	// sprite containing all terrain tile graphics
@@ -85,7 +82,7 @@ private:
 	// is cylindrical wrapping required?
 	bool allowWrappingEastWest = true;
 	// offset of the map
-	sf::Vector2i mapPos = sf::Vector2i(mapWidth, mapHeight) / -2 + (sf::Vector2i)window.getSize()/2;
+	sf::Vector2i mapPos = sf::Vector2i(mapWidth, mapHeight) / -2 + (sf::Vector2i)data->window.getSize()/2;
 	// create the tilemap
 	std::vector<Tile> tiles;
 };
