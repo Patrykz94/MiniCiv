@@ -2,11 +2,18 @@
 
 #define GAME_TITLE "MiniCiv"
 
-#define SCREEN_WIDTH 1280
-#define SCREEN_HEIGHT 720
+///////////////////////////////////////////////////////////////////////////////////////
+/* Font definitions */
 
+// Loading fonts
 #define FONT_ARIAL_PATH "Resources/Fonts/arial.ttf"
 #define FONT_HELVETICA_PATH "Resources/Fonts/HELR45W.ttf"
+
+// Setting fonts
+#define MENU_FONT_NAME "menuFont"
+
+///////////////////////////////////////////////////////////////////////////////////////
+/* Other definitions */
 
 #define CONFIG_DIR "Settings/Config.txt"
 
