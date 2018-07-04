@@ -43,6 +43,13 @@ void PauseMenuState::HandleInput()
 		case sf::Event::Closed:
 			data->window.close();
 			break;
+		case sf::Event::KeyReleased:
+			if (event.key.code == sf::Keyboard::Escape)
+			{
+				std::cout << "Return to map" << std::endl;
+				data->machine.RemoveState();
+			}
+			break;
 		case sf::Event::MouseButtonReleased:
 			if (event.mouseButton.button == 0)
 			{
