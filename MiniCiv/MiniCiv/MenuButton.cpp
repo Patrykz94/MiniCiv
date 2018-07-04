@@ -93,6 +93,21 @@ bool MenuButton::IsSelected() const
 	return selected;
 }
 
+void MenuButton::Enable()
+{
+	available = true;
+	buttonText.setFillColor(textColorBase);
+	buttonShape.setFillColor(rectColorBase);
+}
+
+void MenuButton::Disable()
+{
+	Deselect();
+	available = false;
+	buttonText.setFillColor(textColorDisable);
+	buttonShape.setFillColor(rectColorDisable);
+}
+
 void MenuButton::Draw()
 {
 	data->window.draw(buttonShape);

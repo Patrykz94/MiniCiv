@@ -13,6 +13,9 @@ public:
 	void Deselect();
 
 	bool IsSelected() const;
+
+	void Enable();
+	void Disable();
 	
 	void Draw();
 private:

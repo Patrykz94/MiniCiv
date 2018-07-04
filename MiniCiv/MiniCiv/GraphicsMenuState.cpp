@@ -54,9 +54,9 @@ void GraphicsMenuState::Init()
 	buttonAreaRect2.setFillColor(sf::Color(20, 20, 20));
 	
 	// Initialize our buttons and options
-	selectionDisplayMode = MenuSelection("Display Mode", getButtonPosition(0, buttonsPositionLeft), displayOptionNames, getButtonPosition(0, buttonsPositionRight), getButtonSize(), data, defaultDisplayOption, false);
-	selectionResolution = MenuSelection("Resolution", getButtonPosition(1, buttonsPositionLeft), modeNames, getButtonPosition(1, buttonsPositionRight), getButtonSize(), data, defaultModeOption, true);
-	selectionVsync = MenuSelection("Vsync Enabled", getButtonPosition(2, buttonsPositionLeft), VsyncOptionNames, getButtonPosition(2, buttonsPositionRight), getButtonSize(), data, defaultVsyncOption, false);
+	selectionDisplayMode = MenuSelection("Display Mode", getButtonPosition(0, buttonsPositionLeft), displayOptionNames, getButtonPosition(0, buttonsPositionRight), getButtonSize(), data, defaultDisplayOption);
+	selectionResolution = MenuSelection("Resolution", getButtonPosition(1, buttonsPositionLeft), modeNames, getButtonPosition(1, buttonsPositionRight), getButtonSize(), data, defaultModeOption);
+	selectionVsync = MenuSelection("Vsync Enabled", getButtonPosition(2, buttonsPositionLeft), VsyncOptionNames, getButtonPosition(2, buttonsPositionRight), getButtonSize(), data, defaultVsyncOption);
 	buttonApply = MenuButton("Apply", getButtonPosition(-1, buttonsPositionRight), getButtonSize(), data);
 	buttonBack = MenuButton("Back", getButtonPosition(-1, buttonsPositionLeft), getButtonSize(), data);
 
@@ -175,6 +175,18 @@ void GraphicsMenuState::Update(float dt)
 {
 	// If resolution has changed, re-initialize the menu
 	if (renderRes != data->window.getSize()) data->machine.AddState(StateRef(new GraphicsMenuState(data)), true);;
+
+	// If no settings changes to apply, disable apply button
+	if ((displayOptions[selectionDisplayMode.GetSelectedOption()] != data->settings.GetScreenModeName()) ||
+		(modes[selectionResolution.GetSelectedOption()].width != data->settings.GetScreenResolution().x || modes[selectionResolution.GetSelectedOption()].height != data->settings.GetScreenResolution().y) ||
+		(VsyncOptions[selectionVsync.GetSelectedOption()] != data->settings.GetScreenVsync()))
+	{
+		buttonApply.Enable();
+	}
+	else
+	{
+		buttonApply.Disable();
+	}
 
 	// Selections highlight code
 	if (selectionDisplayMode.GetLeftRect().contains(sf::Mouse::getPosition(data->window))) selectionDisplayMode.SelectLeft();

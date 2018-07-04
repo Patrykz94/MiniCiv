@@ -40,8 +40,8 @@ void InterfaceMenuState::Init()
 	buttonAreaRect2.setFillColor(sf::Color(20, 20, 20));
 
 	// Initialize our buttons and options
-	selectionShowFPS = MenuSelection("Show FPS", getButtonPosition(0, buttonsPositionLeft), fpsOptionNames, getButtonPosition(0, buttonsPositionRight), getButtonSize(), data, defaultFpsOption, false);
-	selectionShowGridCoords = MenuSelection("Show Grid Coordinates", getButtonPosition(1, buttonsPositionLeft), gridCoordsOptionNames, getButtonPosition(1, buttonsPositionRight), getButtonSize(), data, defaultGridCoordOption, false);
+	selectionShowFPS = MenuSelection("Show FPS", getButtonPosition(0, buttonsPositionLeft), fpsOptionNames, getButtonPosition(0, buttonsPositionRight), getButtonSize(), data, defaultFpsOption);
+	selectionShowGridCoords = MenuSelection("Show Grid Coordinates", getButtonPosition(1, buttonsPositionLeft), gridCoordsOptionNames, getButtonPosition(1, buttonsPositionRight), getButtonSize(), data, defaultGridCoordOption);
 	buttonApply = MenuButton("Apply", getButtonPosition(-1, buttonsPositionRight), getButtonSize(), data);
 	buttonBack = MenuButton("Back", getButtonPosition(-1, buttonsPositionLeft), getButtonSize(), data);
 
@@ -115,6 +115,17 @@ void InterfaceMenuState::Update(float dt)
 {
 	// If resolution has changed, re-initialize the menu
 	if (renderRes != data->window.getSize()) data->machine.AddState(StateRef(new InterfaceMenuState(data)), true);;
+
+	// If no settings changes to apply, disable apply button
+	if ((fpsOptions[selectionShowFPS.GetSelectedOption()] != data->settings.GetShowFPS()) ||
+		(gridCoordsOptions[selectionShowGridCoords.GetSelectedOption()] != data->settings.GetShowGridCoords()))
+	{
+		buttonApply.Enable();
+	}
+	else
+	{
+		buttonApply.Disable();
+	}
 
 	// Selections highlight code
 	if (selectionShowFPS.GetLeftRect().contains(sf::Mouse::getPosition(data->window))) selectionShowFPS.SelectLeft();
