@@ -10,6 +10,11 @@ InterfaceMenuState::InterfaceMenuState(GameDataRef dataIn)
 	data(dataIn)
 {
 	// Set selection options and defaults
+	zoomOptionNames = { "Yes", "No" };
+	zoomOptions = { true, false };
+	if (data->settings.GetZoomToMouse()) defaultZoomOption = 0;
+	else defaultZoomOption = 1;
+
 	fpsOptionNames = { "Yes", "No" };
 	fpsOptions = { true, false };
 	if (data->settings.GetShowFPS()) defaultFpsOption = 0;
@@ -40,8 +45,9 @@ void InterfaceMenuState::Init()
 	buttonAreaRect2.setFillColor(sf::Color(20, 20, 20));
 
 	// Initialize our buttons and options
-	selectionShowFPS = MenuSelection("Show FPS", getButtonPosition(0, buttonsPositionLeft), fpsOptionNames, getButtonPosition(0, buttonsPositionRight), getButtonSize(), data, defaultFpsOption);
-	selectionShowGridCoords = MenuSelection("Show Grid Coordinates", getButtonPosition(1, buttonsPositionLeft), gridCoordsOptionNames, getButtonPosition(1, buttonsPositionRight), getButtonSize(), data, defaultGridCoordOption);
+	selectionZoomToMouse = MenuSelection("Zoom To Mouse", getButtonPosition(0, buttonsPositionLeft), zoomOptionNames, getButtonPosition(0, buttonsPositionRight), getButtonSize(), data, defaultZoomOption);
+	selectionShowFPS = MenuSelection("Show FPS", getButtonPosition(1, buttonsPositionLeft), fpsOptionNames, getButtonPosition(1, buttonsPositionRight), getButtonSize(), data, defaultFpsOption);
+	selectionShowGridCoords = MenuSelection("Show Grid Coordinates", getButtonPosition(2, buttonsPositionLeft), gridCoordsOptionNames, getButtonPosition(2, buttonsPositionRight), getButtonSize(), data, defaultGridCoordOption);
 	buttonApply = MenuButton("Apply", getButtonPosition(-1, buttonsPositionRight), getButtonSize(), data);
 	buttonBack = MenuButton("Back", getButtonPosition(-1, buttonsPositionLeft), getButtonSize(), data);
 
@@ -62,6 +68,19 @@ void InterfaceMenuState::HandleInput()
 		case sf::Event::MouseButtonReleased:
 			if (event.mouseButton.button == 0)
 			{
+				////////////////////////////////////////////////////////
+				if (selectionZoomToMouse.IsSelectedLeft())
+				{
+					std::cout << "Move Left" << std::endl;
+					selectionZoomToMouse.MoveLeft();
+					break;
+				}
+				else if (selectionZoomToMouse.IsSelectedRight())
+				{
+					std::cout << "Move Right" << std::endl;
+					selectionZoomToMouse.MoveRight();
+					break;
+				}
 				////////////////////////////////////////////////////////
 				if (selectionShowFPS.IsSelectedLeft())
 				{
@@ -93,6 +112,7 @@ void InterfaceMenuState::HandleInput()
 				{
 					std::cout << "Apply Settings" << std::endl;
 
+					if (zoomOptions[selectionZoomToMouse.GetSelectedOption()] != data->settings.GetZoomToMouse()) data->settings.SetZoomToMouse(zoomOptions[selectionZoomToMouse.GetSelectedOption()]);
 					if (fpsOptions[selectionShowFPS.GetSelectedOption()] != data->settings.GetShowFPS()) data->settings.SetShowFPS(fpsOptions[selectionShowFPS.GetSelectedOption()]);
 					if (gridCoordsOptions[selectionShowGridCoords.GetSelectedOption()] != data->settings.GetShowGridCoords()) data->settings.SetShowGridCoords(gridCoordsOptions[selectionShowGridCoords.GetSelectedOption()]);
 					
@@ -117,7 +137,8 @@ void InterfaceMenuState::Update(float dt)
 	if (renderRes != data->window.getSize()) data->machine.AddState(StateRef(new InterfaceMenuState(data)), true);;
 
 	// If no settings changes to apply, disable apply button
-	if ((fpsOptions[selectionShowFPS.GetSelectedOption()] != data->settings.GetShowFPS()) ||
+	if ((zoomOptions[selectionZoomToMouse.GetSelectedOption()] != data->settings.GetZoomToMouse()) ||
+		(fpsOptions[selectionShowFPS.GetSelectedOption()] != data->settings.GetShowFPS()) ||
 		(gridCoordsOptions[selectionShowGridCoords.GetSelectedOption()] != data->settings.GetShowGridCoords()))
 	{
 		buttonApply.Enable();
@@ -128,6 +149,11 @@ void InterfaceMenuState::Update(float dt)
 	}
 
 	// Selections highlight code
+	if (selectionZoomToMouse.GetLeftRect().contains(sf::Mouse::getPosition(data->window))) selectionZoomToMouse.SelectLeft();
+	else selectionZoomToMouse.DeselectLeft();
+	if (selectionZoomToMouse.GetRightRect().contains(sf::Mouse::getPosition(data->window))) selectionZoomToMouse.SelectRight();
+	else selectionZoomToMouse.DeselectRight();
+
 	if (selectionShowFPS.GetLeftRect().contains(sf::Mouse::getPosition(data->window))) selectionShowFPS.SelectLeft();
 	else selectionShowFPS.DeselectLeft();
 	if (selectionShowFPS.GetRightRect().contains(sf::Mouse::getPosition(data->window))) selectionShowFPS.SelectRight();
@@ -160,6 +186,7 @@ void InterfaceMenuState::Draw(float dt)
 		data->window.draw(buttonAreaRect2);
 
 		// draw buttons
+		selectionZoomToMouse.Draw();
 		selectionShowFPS.Draw();
 		selectionShowGridCoords.Draw();
 		buttonApply.Draw();

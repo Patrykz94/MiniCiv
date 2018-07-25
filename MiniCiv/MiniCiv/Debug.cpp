@@ -31,8 +31,8 @@ void Debug::DrawFPS(sf::RenderWindow& window) const
 
 void Debug::DrawGridCoordinates(const sf::Vector2i& gridPos, const sf::Vector2i& scrnPos, sf::RenderWindow& window) const
 {
-	sf::Text text = sf::Text(std::to_string(gridPos.x) + "\n" + std::to_string(gridPos.y), font, 10);
+	sf::Text text = sf::Text(std::to_string(gridPos.x) + "\n" + std::to_string(gridPos.y), font, 80);
 	text.setFillColor(sf::Color::Red);
-	text.setPosition((sf::Vector2f)scrnPos);
+	text.setPosition((sf::Vector2f)scrnPos + sf::Vector2f(120.0f, 160.0f));
 	window.draw(text);
 }

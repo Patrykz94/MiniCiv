@@ -1,88 +1,171 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
-#include <algorithm>
-#include <vector>
-#include "Debug.h"
-#include "Config.h"
+
+#include <iostream>
+
 #include "Game.h"
+#include "PerlinNoise.h"
 
 class Map
 {
-private:
+protected:
 	class Tile
 	{
 	public:
-		enum class ElevationType
+		enum class Type
 		{
 			Ocean,
 			Shore,
+			Desert,
+			Plains,
+			Grassland,
+			Tundra,
+			Snow,
+			Mountain,
+			Count
+		};
+		enum class Elevation
+		{
+			Water,
 			Flat,
 			Hill,
 			Mountain,
 			Count
 		};
+		enum class Vegetation
+		{
+			None,
+			Grass,
+			Forest,
+			Jungle,
+			Count
+		};
 	public:
-		Tile(Map& map, char c, const sf::Vector2i& gridPos, const sf::Texture& tileSprite);
-		Tile(Map& map, ElevationType elevationType, const sf::Vector2i& gridPos, const sf::Texture& tileSprite);
-		void Draw(const sf::Vector2i& screenPos, sf::RenderWindow& window) const;
-		void SetElevation(float elevation);
+		Tile(const Map& map, int column, int row);
+
+		sf::Vector2i Position() const;
+		sf::Vector2i PositionFromView(sf::View& mapView, int mapWidth, bool allowWrappingEastWest) const;
+		void Draw(sf::Vector2i scrnPos, sf::RenderWindow& window) const;
+		int GetQ() const;
+		int GetR() const;
+		int GetS() const;
+
 		float GetElevation() const;
-		ElevationType GetElevationType() const;
-		sf::Vector2i GetPosition() const;
-		float DistanceToTile(const sf::Vector2i& gridPos) const;
+		void SetElevation(float elevation);
+
+		Elevation GetElevationType() const;
+		void SetElevationType(Elevation elevation);
+
+		Type GetTileType() const;
+		void SetTileType(Type type);
+
+		Vegetation GetTileVegetation() const;
+		void SetTileVegetation(Vegetation vegetation);
+
+		float GetMoisture() const;
+		void SetMoisture(float moisture);
+
+		float GetTemperature() const;
+		void SetTemperature(float temperature);
+
+		int DistanceTo(Tile& t) const;
+		static int GetWidth();
+		static int GetHeight();
 	private:
 		sf::IntRect MapTileRect() const;
+		sf::IntRect MapVegetationRect() const;
 	private:
-		Map & map;
-		sf::Vector2i position;
-		const sf::Texture& tileSprite;
-		ElevationType elevationType;
-		float elevation = -1.0f;
+		const int Q;	//	Column
+		const int R;	//	Row
+		const int S;
+
+		float elevation = -0.5f;
+		float moisture = 0.4f;
+		// Temperature ranges from 0 to 1
+		float temperature = 0.6f;
+
+		const Map& map;
+
+		Type tileType = Type::Ocean;
+		Elevation tileElevation = Elevation::Water;
+		Vegetation tileVegetation = Vegetation::None;
+
+		static constexpr float radius = 220.0f;
+		static constexpr float WIDTH_MULTIPLIER = 1.0f;
 	};
 public:
-	enum class Type
-	{
-		Empty,
-		Continents,
-		Count
-	};
-public:
-	Map(GameDataRef& data, Debug& debug, const Config& config);
-	bool WrappingEastWest() const;
-	sf::Vector2i Size() const;
+	Map(GameDataRef& data, sf::View& mapView);
+
 	void Draw() const;
 	void MoveView(const sf::Vector2i& deltaPos);
-private:
-	// allows selecting the tile by supplying it's position on the grid
-	Tile & TileAt(sf::Vector2i gridPos);
-	const Tile& TileAt(const sf::Vector2i& gridPos) const;
-	sf::Vector2i GridToScreen(const sf::Vector2i& gridPos) const;
-	sf::Vector2i ScreenToGrid(const sf::Vector2i& scrnPos) const;
-	sf::Vector2i GridAtIndex(int index) const;
-	// returns a vector of grid coordinates around the tile provided
-	std::vector<sf::Vector2i> GetTilesAround(const sf::Vector2i& gridPos, float distance) const;
-	void GenerateMap(Type type = Type::Empty);
-	// elevate an area passed into this function
-	void ElevateArea(const std::vector<sf::Vector2i>& area);
+	void ZoomIn();
+	void ZoomOut();
+	void UpdateView();
+	const sf::Texture& GetTileSprite() const;
+	const sf::Vector2i& GetTileSize() const;
+	bool IsWrappingAllowed() const;
+	sf::Vector2i GetGridSize() const;
+protected:
+	virtual void GenerateMap();
+	
+	void UpdateTileVisuals();
+	std::vector<sf::Vector2i> GetTilesWithinRangeOf(Tile& centerTile, int radius);
+	void ElevateArea(int q, int r, int radius, float centerHeight = 0.8f);
+	int DistanceBetween(Tile& a, Tile& b) const;
+	Tile & TileAt(int x, int y);
+	Tile & TileAt(sf::Vector2i gridPos)
+	{
+		return TileAt(gridPos.x, gridPos.y);
+	}
+	const Tile & TileAt(int x, int y) const;
+	const Tile & TileAt(sf::Vector2i gridPos) const
+	{
+		return TileAt(gridPos.x, gridPos.y);
+	}
+	//sf::Vector2i GridToScreen(const int column, const int row) const;
+protected:
+	// maps size in columns and rows
+	const int numColumns;
+	const int numRows;
+
+	std::vector<Tile> tiles;
+
+	// Tile with height above whatever, is whatever
+	float heightMountain = 1.0f;
+	float heightHill = 0.6f;
+	float heightFlat = 0.0f;
+
+	// Tile with moisture above whatever is whatever
+	float moistureJungle = 0.8f;
+	float moistureForest = 0.5f;
+	float moistureGrassland = 0.3f;
+	float moisturePlains = 0.2f;
+
+	// Tile with temperature above whatever is whatever
+	// NOTE: 0.3 = 0 celcius, 1.0 = 30 celcius
+	float temperatureDesert = 0.8f;
+	float temperatureJungle = 0.65f;
+	float temperatureForest = 0.45f;
+	float temperatureGrassland = 0.35f;
+	float temperaturePlains = 0.35f;
+	float temperatureTundra = 0.2f;
 private:
 	GameDataRef& data;
-	// debug class
-	Debug& debug;
-	// sprite containing all terrain tile graphics
+	sf::View& mapView;
+
+	static constexpr float zoomLevels[15] = { 1.0f, 1.25f, 1.5f, 2.0f, 2.5f, 3.0f, 4.0f, 5.0f, 6.0f, 7.5f, 9.0f, 12.0f, 15.0f, 18.0f, 22.0f };
+	int mapZoomLevel;
+
+	const sf::Vector2i tileSize = { 440, 440 };
+
 	sf::Texture tileSprite;
-	// size of each tile
-	static constexpr int tileSize = 60;
-	// dimensions of the map in number of tiles
-	int numColumns;
-	int numRows;
-	// dimensions of the map in pixels
-	int mapWidth = numColumns * tileSize;
-	int mapHeight = numRows * tileSize;
+
 	// is cylindrical wrapping required?
 	bool allowWrappingEastWest = true;
-	// offset of the map
-	sf::Vector2i mapPos = sf::Vector2i(mapWidth, mapHeight) / -2 + (sf::Vector2i)data->window.getSize()/2;
-	// create the tilemap
-	std::vector<Tile> tiles;
+	int rowDist = int((float)tileSize.y * 0.75f);
+
+	// dimensions of the map in pixels
+	const int mapWidth = numColumns * tileSize.x + (tileSize.x/2);
+	const int mapHeight = (int)((float)numRows * rowDist + (1.0f - 0.75f) * (float)tileSize.y);
 };

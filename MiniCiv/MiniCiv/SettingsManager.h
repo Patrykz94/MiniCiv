@@ -30,10 +30,12 @@ public:
 	
 	/////////////////////////////////////////////////////////
 
+	bool GetZoomToMouse() const;
+	void SetZoomToMouse(bool zoomToMouse);
 	bool GetShowFPS() const;
-	void SetShowFPS(bool showFpsIn);
+	void SetShowFPS(bool showFps);
 	bool GetShowGridCoords() const;
-	void SetShowGridCoords(bool showGridCoordsIn);
+	void SetShowGridCoords(bool showGridCoords);
 
 	/////////////////////////////////////////////////////////
 
@@ -45,6 +47,7 @@ private:
 	bool screenVsync;
 	
 	// Interface/Debug settings
+	bool zoomToMouse;
 	bool showFps;
 	bool showGridCoords;
 };

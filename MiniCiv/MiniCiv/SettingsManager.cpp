@@ -11,6 +11,7 @@ SettingsManager::SettingsManager()
 	screenVsync = true;
 	
 	// Interface/Debug settings
+	zoomToMouse = true;
 	showFps = true;
 	showGridCoords = false;
 }
@@ -55,6 +56,16 @@ bool SettingsManager::GetScreenVsync() const
 void SettingsManager::SetScreenVsync(bool Vsync)
 {
 	screenVsync = Vsync;
+}
+
+bool SettingsManager::GetZoomToMouse() const
+{
+	return zoomToMouse;
+}
+
+void SettingsManager::SetZoomToMouse(bool zoomToMouseIn)
+{
+	zoomToMouse = zoomToMouseIn;
 }
 
 bool SettingsManager::GetShowFPS() const

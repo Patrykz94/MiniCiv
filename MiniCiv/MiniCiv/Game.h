@@ -9,6 +9,8 @@
 #include "InputManager.h"
 #include "SettingsManager.h"
 #include "DEFINITIONS.h"
+#include "Debug.h"
+#include "Math.h"
 
 struct GameData
 {
@@ -17,6 +19,7 @@ struct GameData
 	AssetManager assets;
 	InputManager input;
 	SettingsManager settings;
+	Debug debug;
 };
 
 typedef std::shared_ptr<GameData> GameDataRef;

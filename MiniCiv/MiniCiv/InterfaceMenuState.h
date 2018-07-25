@@ -34,20 +34,24 @@ private:
 	sf::RectangleShape buttonAreaRect2;
 
 	// Buttons/Selections visible in main menu
+	MenuSelection selectionZoomToMouse = { data };
 	MenuSelection selectionShowFPS = { data };
 	MenuSelection selectionShowGridCoords = { data };
 	MenuButton buttonApply = { data };
 	MenuButton buttonBack = { data };
 
 	// Selection option names
+	std::vector<std::string> zoomOptionNames;
 	std::vector<std::string> fpsOptionNames;
 	std::vector<std::string> gridCoordsOptionNames;
 
 	// Selection option values
+	std::vector<bool> zoomOptions;
 	std::vector<bool> fpsOptions;
 	std::vector<bool> gridCoordsOptions;
 
 	// Default selection options
+	int defaultZoomOption;
 	int defaultFpsOption;
 	int defaultGridCoordOption;
 

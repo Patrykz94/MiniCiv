@@ -7,6 +7,7 @@ class Debug
 {
 public:
 	Debug();
+	~Debug() {};
 	void Update(float dt);
 	void DrawFPS(sf::RenderWindow& window) const;
 	void DrawGridCoordinates(const sf::Vector2i& gridPos, const sf::Vector2i& scrnPos, sf::RenderWindow& window) const;

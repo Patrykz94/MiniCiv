@@ -1,419 +1,436 @@
 #include "Map.h"
-#include "PerlinNoise.h"
-#include <math.h>
-#include <random>
-#include <assert.h>
 
-Map::Map(GameDataRef& data, Debug & debug, const Config& config)
+Map::Map(GameDataRef & data, sf::View & mapView)
 	:
-	debug(debug),
-	data(data)
+	data(data),
+	mapView(mapView),
+	mapZoomLevel(5),
+	numColumns(64),
+	numRows(32)
 {
-	// load textures
-	tileSprite.loadFromFile("Resources\\Textures\\mapTiles60x60.bmp");
+	tileSprite.loadFromFile("Resources\\Textures\\mapTiles440x440.png");
+	mapView.setCenter(sf::Vector2f((float)mapWidth/2.0f, (float)mapHeight/2.0f));
+	mapView.setSize((sf::Vector2f)data->window.getSize() * zoomLevels[mapZoomLevel]);
+}
 
-	// load user configs
-	int mSize = config.Get(Config::Option::MapSize);
-	int mWidth = config.Get(Config::Option::MapWidth);
-	int mHeight = config.Get(Config::Option::MapHeight);
-	int mWrap = config.Get(Config::Option::MapWrapping);
-	if (mWidth != 0 && mHeight != 0)
+void Map::GenerateMap()
+{
+	// Generate an empty ocean map
+	for (int row = 0; row < numRows; row++)
 	{
-		numColumns = mWidth;
-		numRows = mHeight;
-	}
-	else
-	{
-		switch (mSize)
+		for (int column = 0; column < numColumns; column++)
 		{
-		case 0:
-			numColumns = 48;
-			numRows = 24;
-			break;
-		case 1:
-			numColumns = 96;
-			numRows = 48;
-			break;
-		case 2:
-			numColumns = 144;
-			numRows = 72;
-			break;
-		case 3:
-			numColumns = 192;
-			numRows = 96;
+			// Create a tile
+			tiles.emplace_back(*this, column, row);
 		}
 	}
-	if (mWrap == 1)
+
+	UpdateTileVisuals();
+}
+
+void Map::UpdateTileVisuals()
+{
+	for (Tile& t : tiles)
 	{
-		allowWrappingEastWest = true;
+		// Set terrain elevation
+		if (t.GetElevation() > heightMountain)
+		{
+			t.SetElevationType(Tile::Elevation::Mountain);
+			t.SetTileType(Tile::Type::Mountain);
+		}
+		else if (t.GetElevation() > heightHill)
+		{
+			t.SetElevationType(Tile::Elevation::Hill);
+		}
+		else if (t.GetElevation() > heightFlat)
+		{
+			t.SetElevationType(Tile::Elevation::Flat);
+		}
+		else
+		{
+			t.SetElevationType(Tile::Elevation::Water);
+			if (t.GetTileType() != Tile::Type::Shore) t.SetTileType(Tile::Type::Ocean);
+		}
+
+		// Set terrain temperature/moisture
+		if (t.GetElevationType() > Tile::Elevation::Water && t.GetElevationType() < Tile::Elevation::Mountain)
+		{
+			if (t.GetTemperature() < temperatureTundra)
+			{
+				t.SetTileType(Tile::Type::Snow);
+				t.SetTileVegetation(Tile::Vegetation::None);
+			}
+			else if (t.GetTemperature() < temperaturePlains)
+			{
+				t.SetTileType(Tile::Type::Tundra);
+
+				if (t.GetMoisture() >= moistureForest)
+				{
+					t.SetTileVegetation(Tile::Vegetation::Forest);
+				}
+				else
+				{
+					t.SetTileVegetation(Tile::Vegetation::None);
+				}
+			}
+			else if (t.GetTemperature() < temperatureForest)
+			{
+				if (t.GetMoisture() >= moistureGrassland)
+				{
+					t.SetTileType(Tile::Type::Grassland);
+					t.SetTileVegetation(Tile::Vegetation::Grass);
+				}
+				else
+				{
+					t.SetTileType(Tile::Type::Plains);
+					t.SetTileVegetation(Tile::Vegetation::None);
+				}
+			}
+			else if (t.GetTemperature() < temperatureJungle)
+			{
+				if (t.GetMoisture() >= moistureForest)
+				{
+					t.SetTileType(Tile::Type::Grassland);
+					t.SetTileVegetation(Tile::Vegetation::Forest);
+				}
+				else if (t.GetMoisture() >= moistureGrassland)
+				{
+					t.SetTileType(Tile::Type::Grassland);
+					t.SetTileVegetation(Tile::Vegetation::Grass);
+				}
+				else
+				{
+					t.SetTileType(Tile::Type::Plains);
+					t.SetTileVegetation(Tile::Vegetation::None);
+				}
+			}
+			else if (t.GetTemperature() < temperatureDesert)
+			{
+				if (t.GetMoisture() >= moistureJungle)
+				{
+					t.SetTileType(Tile::Type::Grassland);
+					t.SetTileVegetation(Tile::Vegetation::Jungle);
+				}
+				else if (t.GetMoisture() >= moistureForest)
+				{
+					t.SetTileType(Tile::Type::Grassland);
+					t.SetTileVegetation(Tile::Vegetation::Forest);
+				}
+				else if (t.GetMoisture() >= moistureGrassland)
+				{
+					t.SetTileType(Tile::Type::Grassland);
+					t.SetTileVegetation(Tile::Vegetation::Grass);
+				}
+				else
+				{
+					t.SetTileType(Tile::Type::Plains);
+					t.SetTileVegetation(Tile::Vegetation::None);
+				}
+			}
+			else
+			{
+				if (t.GetMoisture() >= moistureJungle)
+				{
+					t.SetTileType(Tile::Type::Grassland);
+					t.SetTileVegetation(Tile::Vegetation::Jungle);
+				}
+				else if (t.GetMoisture() >= moistureForest)
+				{
+					t.SetTileType(Tile::Type::Grassland);
+					t.SetTileVegetation(Tile::Vegetation::Forest);
+				}
+				else if (t.GetMoisture() >= moistureGrassland)
+				{
+					t.SetTileType(Tile::Type::Grassland);
+					t.SetTileVegetation(Tile::Vegetation::Grass);
+				}
+				else if (t.GetMoisture() >= moisturePlains)
+				{
+					t.SetTileType(Tile::Type::Plains);
+					t.SetTileVegetation(Tile::Vegetation::None);
+				}
+				else
+				{
+					t.SetTileType(Tile::Type::Desert);
+					t.SetTileVegetation(Tile::Vegetation::None);
+				}
+			}
+		}
+		else
+		{
+			t.SetTileVegetation(Tile::Vegetation::None);
+		}
+	}
+}
+
+std::vector<sf::Vector2i> Map::GetTilesWithinRangeOf(Tile& centerTile, int range)
+{
+	std::vector<sf::Vector2i> results;
+	for (int dx = -range + 1; dx < range; dx++)
+	{
+		for (int dy = std::max(-range + 1, -dx - range + 1); dy < std::min(range, -dx + range); dy++)
+		{
+			results.emplace_back(centerTile.GetQ() + dx, centerTile.GetR() + dy);
+		}
+	}
+	return results;
+}
+
+void Map::ElevateArea(int q, int r, int range, float centerHeight)
+{
+	Tile& centerHex = TileAt(q, r);
+
+	std::vector<sf::Vector2i> tilesToElevate = GetTilesWithinRangeOf(centerHex, range);
+
+	for (sf::Vector2i v : tilesToElevate)
+	{
+		Tile& t = TileAt(v);
+		
+		float distFraction = (float)t.DistanceTo(centerHex) / (float)range;
+
+		t.SetElevation(centerHeight * math::lerp(0.8f, 0.3f, distFraction * distFraction));
+	}
+}
+
+int Map::DistanceBetween(Tile & a, Tile & b) const
+{
+	return a.DistanceTo(b);
+}
+
+Map::Tile & Map::TileAt(int x, int y)
+{
+	assert(tiles.size() > 0);
+	assert(y >= 0 && y < numRows);
+
+	if (allowWrappingEastWest)
+	{
+		x = x % numColumns;
+		if (x < 0) x += numColumns;
 	}
 	else
 	{
-		allowWrappingEastWest = false;
+		assert(x >= 0 && x < numColumns);
 	}
-	mapWidth = numColumns * tileSize;
-	mapHeight = numRows * tileSize;
-	mapPos = sf::Vector2i(mapWidth, mapHeight) / -2 + (sf::Vector2i)data->window.getSize() / 2;
-	// generate the map
-	GenerateMap(Type::Continents);
+
+	return tiles[x + y * numColumns];
+}
+
+const Map::Tile & Map::TileAt(int x, int y) const
+{
+	assert(tiles.size() > 0);
+	assert(x >= 0 && x < numColumns && y >= 0 && y < numRows);
+
+	return tiles[x + y * numColumns];
 }
 
 void Map::Draw() const
 {
-	int tIndex = 0;
-	// draw each tile on the screen
-	for (Tile t : tiles)
+	for (const Tile& t : tiles)
 	{
-		// convert tile index to grid and screen coordinates
-		sf::Vector2i gridPos = GridAtIndex(tIndex);
-		sf::Vector2i scrnPos = GridToScreen(gridPos);
-		// make sure tile is inside screen
-		if (sf::IntRect(scrnPos, sf::Vector2i(tileSize, tileSize)).intersects(sf::IntRect(sf::Vector2i(0,0), (sf::Vector2i)data->window.getSize())))
+		sf::Vector2i pos = t.PositionFromView(mapView, mapWidth, allowWrappingEastWest);
+		if (sf::IntRect(sf::Vector2i(mapView.getCenter() - mapView.getSize() / 2.0f), (sf::Vector2i)mapView.getSize()).intersects(sf::IntRect(pos, sf::Vector2i(Tile::GetWidth(), Tile::GetHeight()))))
 		{
-			// draw the tile
-			t.Draw(scrnPos, data->window);
-			if (data->settings.GetShowGridCoords()) debug.DrawGridCoordinates(gridPos, scrnPos, data->window);
+			t.Draw(pos, data->window);
+			if (data->settings.GetShowGridCoords()) data->debug.DrawGridCoordinates(sf::Vector2i(t.GetQ(), t.GetR()), pos, data->window);
 		}
-		tIndex++;
 	}
 }
 
-void Map::MoveView(const sf::Vector2i& deltaPos)
+void Map::MoveView(const sf::Vector2i & deltaPos)
 {
-	// move the map horizontally by the value provided
-	if (allowWrappingEastWest)
+	// move the map view by the delta provided
+	mapView.move((sf::Vector2f)deltaPos * zoomLevels[mapZoomLevel]);
+}
+
+void Map::ZoomIn()
+{
+	if (mapZoomLevel > 0)
 	{
-		// if east-west wrapping is used, make sure to reset
-		// map position once it is moved too far in one disf::IntRecton
-		int scrnCenter = data->window.getSize().x/2;
-		mapPos.x -= deltaPos.x;
-		if (mapPos.x + mapWidth / 2 < scrnCenter - mapWidth)
+		if (data->settings.GetZoomToMouse())
 		{
-			mapPos.x += mapWidth;
-		}
-		else if (mapPos.x + mapWidth / 2 > scrnCenter)
-		{
-			mapPos.x -= mapWidth;
-		}
-	}
-	else
-	{
-		// if map width is less that screen width, lock map to the screen
-		// otherwise don't allow the view to go off the map instead	
-		if (mapWidth <= (int)data->window.getSize().x)
-		{
-			mapPos.x = std::min(std::max(mapPos.x - deltaPos.x, 0), (int)data->window.getSize().x - mapWidth);
+			sf::Vector2f mousePos = (sf::Vector2f)sf::Mouse::getPosition(data->window);
+			mousePos -= sf::Vector2f(data->window.getSize()) / 2.0f;
+			sf::Vector2f mousePosMap = mousePos * zoomLevels[mapZoomLevel];
+			mousePosMap += mapView.getCenter();
+
+			mapView.setSize((sf::Vector2f)data->window.getSize() * zoomLevels[--mapZoomLevel]);
+
+			sf::Vector2f newMousePos = (sf::Vector2f)sf::Mouse::getPosition(data->window);
+			newMousePos -= sf::Vector2f(data->window.getSize()) / 2.0f;
+			sf::Vector2f newMousePosMap = newMousePos * zoomLevels[mapZoomLevel];
+			newMousePosMap += mapView.getCenter();
+
+			mapView.move((mousePosMap - newMousePosMap));
 		}
 		else
 		{
-			mapPos.x = std::max(std::min(mapPos.x - deltaPos.x, 0), (int)data->window.getSize().x - mapWidth);
+			mapView.setSize((sf::Vector2f)data->window.getSize() * zoomLevels[--mapZoomLevel]);
 		}
-	}
-
-	// move the map vertically by the value provided
-	// if map height is less that screen height, lock map to the screen
-	// otherwise don't allow the view to go off the map instead
-	if (mapHeight <= (int)data->window.getSize().y)
-	{
-		mapPos.y = std::min(std::max(mapPos.y - deltaPos.y, 0), (int)data->window.getSize().y - mapHeight);
-	}
-	else
-	{
-		mapPos.y = std::max(std::min(mapPos.y - deltaPos.y, 0), (int)data->window.getSize().y - mapHeight);
 	}
 }
 
-bool Map::WrappingEastWest() const
+void Map::ZoomOut()
+{
+	if (mapZoomLevel < 14)
+	{
+
+		if (data->settings.GetZoomToMouse())
+		{
+			sf::Vector2f mousePos = (sf::Vector2f)sf::Mouse::getPosition(data->window);
+			mousePos -= sf::Vector2f(data->window.getSize()) / 2.0f;
+			sf::Vector2f mousePosMap = mousePos * zoomLevels[mapZoomLevel];
+			mousePosMap += mapView.getCenter();
+
+			mapView.setSize((sf::Vector2f)data->window.getSize() * zoomLevels[++mapZoomLevel]);
+
+			sf::Vector2f newMousePos = (sf::Vector2f)sf::Mouse::getPosition(data->window);
+			newMousePos -= sf::Vector2f(data->window.getSize()) / 2.0f;
+			sf::Vector2f newMousePosMap = newMousePos * zoomLevels[mapZoomLevel];
+			newMousePosMap += mapView.getCenter();
+
+			mapView.move((mousePosMap - newMousePosMap));
+		}
+		else
+		{
+			mapView.setSize((sf::Vector2f)data->window.getSize() * zoomLevels[++mapZoomLevel]);
+		}
+	}
+}
+
+void Map::UpdateView()
+{
+	// Make sure the zoom level is within bounds
+	if (mapView.getSize().x >(float)mapWidth || mapView.getSize().y > (float)mapHeight)
+	{
+		ZoomIn();
+	}
+
+	// Make sure the "camera" position is within bounds
+	// if view height is more than map height, lock map to the view
+	// otherwise don't allow the view to go off the map instead
+	if (mapView.getSize().y > (float)mapHeight)
+	{
+		mapView.setCenter(mapView.getCenter().x, std::min(std::max(mapView.getCenter().y, mapHeight - mapView.getSize().y / 2.0f), mapView.getSize().y / 2.0f));
+	}
+	else
+	{
+		mapView.setCenter(mapView.getCenter().x, std::max(std::min(mapView.getCenter().y, mapHeight - mapView.getSize().y / 2.0f), mapView.getSize().y / 2.0f));
+	}
+}
+
+const sf::Texture & Map::GetTileSprite() const
+{
+	return tileSprite;
+}
+
+const sf::Vector2i & Map::GetTileSize() const
+{
+	return tileSize;
+}
+
+bool Map::IsWrappingAllowed() const
 {
 	return allowWrappingEastWest;
 }
 
-sf::Vector2i Map::Size() const
+sf::Vector2i Map::GetGridSize() const
 {
 	return sf::Vector2i(numColumns, numRows);
 }
 
-Map::Tile & Map::TileAt(sf::Vector2i gridPos)
-{
-	// returns the tile object at specified grid position
-	if (gridPos.x < 0)
-	{
-		gridPos.x += numColumns;
-	}
-	else if (gridPos.x >= numColumns)
-	{
-		gridPos.x -= numColumns;
-	}
-	return tiles[gridPos.x + gridPos.y * numColumns];
-}
+//sf::Vector2i Map::GridToScreen(const int column, const int row) const
+//{
+//	// converts grid coordinates to pixel coordinates (top left corner of a tile)
+//	int scrnX = column * tileSize.x + row * (tileSize.x/2) + mapPos.x;
+//	int scrnY = row * rowDist + mapPos.y;
+//
+//	if (allowWrappingEastWest) {
+//		int scrnCenter = data->window.getSize().x / 2;
+//
+//		if (scrnX + tileSize.x / 2 < scrnCenter - mapWidth / 2)
+//		{
+//			scrnX += (mapWidth - tileSize.x / 2);
+//		}
+//		else if (scrnX + tileSize.x / 2 > scrnCenter + mapWidth / 2)
+//		{
+//			scrnX -= (mapWidth - tileSize.x / 2);
+//		}
+//	}
+//
+//	return sf::Vector2i(scrnX, scrnY);
+//}
 
-const Map::Tile & Map::TileAt(const sf::Vector2i & gridPos) const
-{
-	// returns the tile object at specified grid position
-	return tiles[gridPos.x + gridPos.y * numColumns];
-}
-
-sf::Vector2i Map::GridToScreen(const sf::Vector2i & gridPos) const
-{
-	// convets grid coordinates to pixel coordinates (top left corner of a tile)
-	sf::Vector2i scrnPos = { gridPos.x * tileSize + mapPos.x, gridPos.y * tileSize + mapPos.y };
-
-	if (allowWrappingEastWest) {
-		int scrnCenter = data->window.getSize().x/2;
-
-		if (scrnPos.x + tileSize / 2 < scrnCenter - mapWidth / 2)
-		{
-			scrnPos.x += mapWidth;
-		}
-		else if (scrnPos.x + tileSize / 2 > scrnCenter + mapWidth / 2)
-		{
-			scrnPos.x -= mapWidth;
-		}
-	}
-
-	return scrnPos;
-}
-
-sf::Vector2i Map::ScreenToGrid(const sf::Vector2i & scrnPos) const
-{
-	// converts the screen pixel coordinates to the grid coordinates
-	sf::Vector2i gridPos = { (scrnPos.x - mapPos.x) / tileSize, (scrnPos.y - mapPos.y) / tileSize };
-
-	if (allowWrappingEastWest) {
-		int scrnCenter = data->window.getSize().x/2;
-
-		if (scrnPos.x + tileSize / 2 < scrnCenter - mapWidth)
-		{
-			gridPos.x += numColumns;
-		}
-		else if (scrnPos.x + tileSize / 2 > scrnCenter + mapWidth)
-		{
-			gridPos.x -= numColumns;
-		}
-	}
-
-	gridPos.x = gridPos.x % numColumns;
-
-	return gridPos;
-}
-
-sf::Vector2i Map::GridAtIndex(int index) const
-{
-	// convert tile index to grid coordinates
-	return sf::Vector2i(index % numColumns, index / numColumns);
-}
-
-std::vector<sf::Vector2i> Map::GetTilesAround(const sf::Vector2i & centerPos, float distance) const
-{
-	// convert distance to int and round it roperly
-	int dist = (int)(distance + 0.5f);
-	// make sure we don't check tiles that are outside of the map
-	int minY = std::max(centerPos.y - dist, 0);
-	int maxY = std::min(centerPos.y + dist, numRows - 1);
-	int minX = centerPos.x - dist;
-	int maxX = centerPos.x + dist;
-	// for the x cordinates allow checking out of bounds tiles as long as world wrapping is enable
-	// otherwise do the same check as with y coordinates
-	if (!allowWrappingEastWest)
-	{
-		minX = std::max(minX, 0);
-		maxX = std::min(maxX, numColumns - 1);
-	}
-
-	std::vector<sf::Vector2i> area;
-	for (int y = minY; y <= maxY; y++)
-	{
-		for (int x = minX; x <= maxX; x++)
-		{
-			if (TileAt(centerPos).DistanceToTile({ x,y }) <= distance + 0.5f)
-			{
-				area.emplace_back(sf::Vector2i(x, y));
-			}
-		}
-	}
-	return area;
-}
-
-float Map::Tile::DistanceToTile(const sf::Vector2i & gridPos) const
-{
-	int x = position.x - gridPos.x;
-	int y = position.y - gridPos.y;
-	return (float)std::sqrt(x * x + y * y);
-}
-
-void Map::GenerateMap(Type type)
-{
-	// set up rng for map generation
-	std::random_device rd;
-	std::mt19937 rng(rd());
-	int mapSize = numColumns * numRows;
-	// make sure that map is empty before starting
-	if (tiles.size() > 0)
-	{
-		tiles.clear();
-	}
-	// generate empty ocean map
-	for (int i = 0; i < mapSize; i++)
-	{
-		tiles.emplace_back(Tile(*this, Tile::ElevationType::Ocean, GridAtIndex(i), tileSprite));
-	}
-
-	if (type == Type::Continents)
-	{
-		// TODO: Redo this the map generation
-		// The idea is to first just generate basic the continent shapes (with like blobs below),
-		// then try to adjust the ocean depth so that ocean is depest the further away it is
-		// from continents, also try to smooth it out.
-
-		// generate continents map
-		// generate frist continet position
-		std::uniform_int_distribution<int> contPos(0, numColumns - 1);
-		int cPos = contPos(rng);
-		// determine number of continents in the world
-		int numberOfContinents = std::max(1, numColumns / 24);
-		int continentsGenerated = 0;
-		float blobsMultiplier = ((float)numRows * 2.0f) / 40.0f;
-		// generate continents (will always generate at least 1)
-		do
-		{
-			// generate number of "blobs" of landmass in the continent
-			std::uniform_int_distribution<int> nBlobs((int)(5.0f * blobsMultiplier), (int)(15.0f * blobsMultiplier));
-			int numBlobs = nBlobs(rng);
-			for (int i = 0; i <= numBlobs; i++)
-			{
-				// generate size of a blob
-				std::uniform_int_distribution<int> blobSize(2, 5);
-				int bSize = blobSize(rng);
-				// generate position of a blob
-				std::uniform_int_distribution<int> blobPosY(bSize + 1, numRows - bSize - 2);
-				std::uniform_int_distribution<int> blobPosX(cPos - 4, cPos + 4);
-
-				// elevate area of the blob
-				ElevateArea(GetTilesAround({ blobPosX(rng), blobPosY(rng) }, (float)bSize));
-			}
-			// calculate position of next continent
-			cPos = (cPos + numColumns / numberOfContinents) % numColumns;
-			continentsGenerated++;
-		} while (continentsGenerated < numberOfContinents);
-		// add Perlin noise to the values
-		std::uniform_int_distribution<unsigned int> noiseSeed(std::numeric_limits<unsigned int>::min(), std::numeric_limits<unsigned int>::max());
-		PerlinNoise pn = { noiseSeed(rng) };
-		// determines size of Perlin noise, small values give large patches, large values give small patches
-		double noiseFactor = 10.0f;
-		// how big of a value can Perlin noise generate ( scale of 1 gives -0.5 t 0.5)
-		float noiseScale = 2.5f;
-		// just a number to divide by, will be number of columns or rows, whichever is larger
-		// double divisionFactor = std::max((double)numColumns, (double)numRows);
-		double divisionFactor = 72.0f;
-		// loop through all tiles to apply Perlin noise to
-		for (Tile& t : tiles)
-		{
-			// get position of a tile
-			sf::Vector2i pos = t.GetPosition();
-			// calculate the x,y,z components to pass to the noise function
-			double xFactor = (double)pos.x / divisionFactor * noiseFactor;
-			double yFactor = (double)pos.y / divisionFactor * noiseFactor;
-			// z is just an average of x and y
-			double zFactor = (xFactor + yFactor) / 2;
-			// generate the noise value. The average value generated is 0.1 instead of 0.
-			// this is to slightly reduce number water tiles generated
-			float pNoise = (float)(pn.noise(xFactor, yFactor, zFactor) - 0.4f) * noiseScale;
-			// apply noise to the current elevation
-			t.SetElevation(t.GetElevation() + pNoise);
-		}
-
-		// smooth out the map a bit to make sure theres always a shore tile between land and ocean tiles
-		// in order to do that, for each ocean tile on the map, we scan all tiles adjacent to it. If any of them
-		// contains a land tile, change this tile elevation to be a shore
-
-		// first create the rng
-		std::uniform_real_distribution<float> shoreElevation(-0.5f, -0.01f);
-
-		for (Tile& t : tiles)
-		{
-			if (t.GetElevationType() == Tile::ElevationType::Ocean)
-			{
-				for (sf::Vector2i adjacentTile : GetTilesAround(t.GetPosition(), 2.0f))
-				{
-					if ((int)TileAt(adjacentTile).GetElevationType() >= (int)Tile::ElevationType::Flat)
-					{
-						t.SetElevation(shoreElevation(rng));
-					}
-				}
-			}
-		}
-	}
-}
-
-void Map::ElevateArea(const std::vector<sf::Vector2i>& area)
-{
-	for (sf::Vector2i v : area)
-	{
-		TileAt(v).SetElevation(0.2f);
-	}
-}
-
-sf::IntRect Map::Tile::MapTileRect() const
-{
-	// return the correct tile sprite from sprite map
-	return sf::IntRect({ 0, tileSize * (int)elevationType }, { tileSize, tileSize });
-}
-
-Map::Tile::Tile(Map& map, char c, const sf::Vector2i& gridPos, const sf::Texture& tileSprite)
+Map::Tile::Tile(const Map& map, int column, int row)
 	:
 	map(map),
-	tileSprite(tileSprite),
-	position(gridPos)
+	Q(column),
+	R(row),
+	S(-(Q+R))
+{}
+
+sf::Vector2i Map::Tile::Position() const
 {
-	// convert from characters to ElevationType and TerrainType
-	const char elevIndex = c - 'A';
-	assert(elevIndex >= (int)ElevationType::Ocean && elevIndex < (int)ElevationType::Count);
-	// set elevation and terrain to the values supplied via the string map
-	elevationType = (ElevationType)elevIndex;
+	float height = radius * 2.0f;
+	float width = WIDTH_MULTIPLIER * height;
+	
+	float vert = height * 0.75f;
+	float horiz = width;
+
+	return sf::Vector2i((int)(horiz * ((float)Q + (float)R / 2.0f)), (int)(vert * (float)R));
 }
 
-Map::Tile::Tile(Map& map, ElevationType elevationType, const sf::Vector2i& gridPos, const sf::Texture& tileSprite)
-	:
-	map(map),
-	tileSprite(tileSprite),
-	position(gridPos)
+sf::Vector2i Map::Tile::PositionFromView(sf::View & mapView, int mapWidthIn, bool allowWrappingEastWest) const
 {
-	assert(elevationType >= ElevationType::Ocean && elevationType < ElevationType::Count);
-	// set elevation and terrain to the values supplied via the string map
-	this->elevationType = elevationType;
+	int mapWidth = mapWidthIn - GetWidth() / 2;
+	sf::Vector2i position = Position();
+
+	if (allowWrappingEastWest)
+	{
+		float howManyWidthsFromViewCenter = ((float)position.x - mapView.getCenter().x) / (float)mapWidth;
+
+		if (abs(howManyWidthsFromViewCenter) <= 0.5f)
+		{
+			return position;
+		}
+
+		if (howManyWidthsFromViewCenter > 0) howManyWidthsFromViewCenter += 0.5f;
+		else howManyWidthsFromViewCenter -= 0.5f;
+
+		int howManyWidthToFix = (int)howManyWidthsFromViewCenter;
+
+		position.x -= howManyWidthToFix * mapWidth;
+	}
+
+	return position;
 }
 
-void Map::Tile::Draw(const sf::Vector2i & scrnPos, sf::RenderWindow& window) const
+void Map::Tile::Draw(sf::Vector2i scrnPos, sf::RenderWindow& window) const
 {
-	// draw selected tile on the screen
-	sf::Sprite sprite = sf::Sprite(tileSprite, MapTileRect());
-	sprite.setPosition((sf::Vector2f)scrnPos);
-	window.draw(sprite);
+	sf::Sprite tile = sf::Sprite(map.GetTileSprite(), MapTileRect());
+	tile.setPosition((sf::Vector2f)scrnPos);
+	window.draw(tile);
+
+	if (tileVegetation != Vegetation::None)
+	{
+		sf::Sprite vegetation = sf::Sprite(map.GetTileSprite(), MapVegetationRect());
+		vegetation.setPosition((sf::Vector2f)scrnPos);
+		window.draw(vegetation);
+	}
 }
 
-void Map::Tile::SetElevation(float newElevation)
+int Map::Tile::GetQ() const
 {
-	elevation = std::max(-10.0f, std::min(10.0f, newElevation));
-	if (elevation > 1.0f)
-	{
-		elevationType = ElevationType::Mountain;
-	}
-	else if (elevation > 0.5f)
-	{
-		elevationType = ElevationType::Hill;
-	}
-	else if (elevation >= 0.0f)
-	{
-		elevationType = ElevationType::Flat;
-	}
-	else if (elevation >= -0.5f)
-	{
-		elevationType = ElevationType::Shore;
-	}
-	else
-	{
-		elevationType = ElevationType::Ocean;
-	}
+	return Q;
+}
+
+int Map::Tile::GetR() const
+{
+	return R;
+}
+
+int Map::Tile::GetS() const
+{
+	return S;
 }
 
 float Map::Tile::GetElevation() const
@@ -421,12 +438,103 @@ float Map::Tile::GetElevation() const
 	return elevation;
 }
 
-Map::Tile::ElevationType Map::Tile::GetElevationType() const
+void Map::Tile::SetElevation(float elevationIn)
 {
-	return elevationType;
+	elevation = elevationIn;
+
+	// TODO: set tile elevation type by elevation height;
 }
 
-sf::Vector2i Map::Tile::GetPosition() const
+Map::Tile::Elevation Map::Tile::GetElevationType() const
 {
-	return position;
+	return tileElevation;
+}
+
+void Map::Tile::SetElevationType(Elevation elevationIn)
+{
+	assert((int)elevationIn >= 0 && elevationIn < Elevation::Count);
+	tileElevation = elevationIn;
+}
+
+Map::Tile::Type Map::Tile::GetTileType() const
+{
+	return tileType;
+}
+
+void Map::Tile::SetTileType(Type typeIn)
+{
+	assert((int)typeIn >= 0 && typeIn < Type::Count);
+	tileType = typeIn;
+}
+
+Map::Tile::Vegetation Map::Tile::GetTileVegetation() const
+{
+	return tileVegetation;
+}
+
+void Map::Tile::SetTileVegetation(Vegetation vegetationIn)
+{
+	assert((int)vegetationIn >= 0 && vegetationIn < Vegetation::Count);
+	tileVegetation = vegetationIn;
+}
+
+void Map::Tile::SetMoisture(float moistureIn)
+{
+	moisture = moistureIn;
+}
+
+float Map::Tile::GetTemperature() const
+{
+	return temperature;
+}
+
+void Map::Tile::SetTemperature(float temperatureIn)
+{
+	temperature = temperatureIn;
+}
+
+float Map::Tile::GetMoisture() const
+{
+	return moisture;
+}
+
+int Map::Tile::DistanceTo(Tile & t) const
+{
+	int dQ = std::abs(Q - t.GetQ());
+	int dS = std::abs(S - t.GetS());
+	if (map.IsWrappingAllowed()) {
+		if (dQ > map.GetGridSize().x / 2)
+		{
+			dQ -= map.GetGridSize().x;
+			dS -= map.GetGridSize().x;
+		}
+	}
+
+	return std::max(
+		dQ,
+		std::max(
+			std::abs(R - t.GetR()),
+			dS
+		)
+	);
+}
+
+int Map::Tile::GetWidth()
+{
+	return int(radius * 2.0f * WIDTH_MULTIPLIER);
+}
+
+int Map::Tile::GetHeight()
+{
+	return int(radius * 2.0f);
+}
+
+sf::IntRect Map::Tile::MapTileRect() const
+{
+	return sf::IntRect({map.GetTileSize().x * (int)tileType, map.GetTileSize().y * (int)tileElevation}, map.GetTileSize());
+}
+
+sf::IntRect Map::Tile::MapVegetationRect() const
+{
+	return sf::IntRect({ map.GetTileSize().x * (int)tileVegetation, map.GetTileSize().y * (int)Elevation::Count }, map.GetTileSize());
 }

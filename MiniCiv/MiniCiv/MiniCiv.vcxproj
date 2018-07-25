@@ -128,7 +128,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AssetManager.cpp" />
-    <ClCompile Include="Config.cpp" />
     <ClCompile Include="Debug.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="GameState.cpp" />
@@ -138,6 +137,8 @@
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="MainMenuState.cpp" />
     <ClCompile Include="Map.cpp" />
+    <ClCompile Include="Map_Continents.cpp" />
+    <ClCompile Include="Math.cpp" />
     <ClCompile Include="MenuButton.cpp" />
     <ClCompile Include="MenuSelection.cpp" />
     <ClCompile Include="SettingsManager.cpp" />
@@ -149,7 +150,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AssetManager.h" />
-    <ClInclude Include="Config.h" />
     <ClInclude Include="Debug.h" />
     <ClInclude Include="DEFINITIONS.h" />
     <ClInclude Include="Game.h" />
@@ -159,6 +159,8 @@
     <ClInclude Include="InterfaceMenuState.h" />
     <ClInclude Include="MainMenuState.h" />
     <ClInclude Include="Map.h" />
+    <ClInclude Include="Map_Continents.h" />
+    <ClInclude Include="Math.h" />
     <ClInclude Include="MenuButton.h" />
     <ClInclude Include="MenuSelection.h" />
     <ClInclude Include="SettingsManager.h" />
@@ -169,9 +171,6 @@
     <ClInclude Include="SplashState.h" />
     <ClInclude Include="State.h" />
     <ClInclude Include="StateMachine.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="Settings\config.txt" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="MiniCiv.rc" />

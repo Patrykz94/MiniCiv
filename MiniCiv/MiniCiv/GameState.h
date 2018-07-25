@@ -4,7 +4,7 @@
 #include "State.h"
 #include "Game.h"
 
-#include "Map.h"
+#include "Map_Continents.h"
 
 class GameState : public State
 {
@@ -22,10 +22,11 @@ private:
 	sf::Font font;
 	sf::Clock clock;
 	sf::Color backgroundColor = sf::Color::Color(38, 38, 38);
-	Debug debug;
-	Config config = { CONFIG_DIR };
 
-	Map world = { data, debug, config };
+	sf::View mapView;
+	sf::View minimapView;
+
+	Map_Continents world = { data, mapView };
 	
 	sf::Vector2i lastMousePressAt = { 0, 0 };
 	float LPressTime = 0.0f;

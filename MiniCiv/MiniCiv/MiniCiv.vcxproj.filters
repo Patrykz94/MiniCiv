@@ -64,15 +64,6 @@
     <ClInclude Include="Game.h">
       <Filter>Engine</Filter>
     </ClInclude>
-    <ClInclude Include="Config.h">
-      <Filter>Other</Filter>
-    </ClInclude>
-    <ClInclude Include="Debug.h">
-      <Filter>Other</Filter>
-    </ClInclude>
-    <ClInclude Include="Map.h">
-      <Filter>Other</Filter>
-    </ClInclude>
     <ClInclude Include="PerlinNoise.h">
       <Filter>Other</Filter>
     </ClInclude>
@@ -84,6 +75,18 @@
     </ClInclude>
     <ClInclude Include="InterfaceMenuState.h">
       <Filter>States</Filter>
+    </ClInclude>
+    <ClInclude Include="Map.h">
+      <Filter>Other</Filter>
+    </ClInclude>
+    <ClInclude Include="Debug.h">
+      <Filter>Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Math.h">
+      <Filter>Other</Filter>
+    </ClInclude>
+    <ClInclude Include="Map_Continents.h">
+      <Filter>Other</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -129,26 +132,24 @@
     <ClCompile Include="PerlinNoise.cpp">
       <Filter>Other</Filter>
     </ClCompile>
-    <ClCompile Include="Config.cpp">
-      <Filter>Other</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug.cpp">
-      <Filter>Other</Filter>
-    </ClCompile>
-    <ClCompile Include="Map.cpp">
-      <Filter>Other</Filter>
-    </ClCompile>
     <ClCompile Include="SettingsManager.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
     <ClCompile Include="InterfaceMenuState.cpp">
       <Filter>States</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="Settings\config.txt">
-      <Filter>Resource Files</Filter>
-    </Text>
+    <ClCompile Include="Map.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug.cpp">
+      <Filter>Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="Math.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
+    <ClCompile Include="Map_Continents.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="MiniCiv.rc">

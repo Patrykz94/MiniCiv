@@ -37,6 +37,17 @@ void GameState::HandleInput()
 				break;
 			}
 			break;
+		case sf::Event::MouseWheelScrolled:
+			float scrolDelta = event.mouseWheelScroll.delta;
+			if (scrolDelta > 0.0f)
+			{
+				world.ZoomIn();
+			}
+			else
+			{
+				world.ZoomOut();
+			}
+			break;
 		}
 	}
 }
@@ -44,7 +55,7 @@ void GameState::HandleInput()
 void GameState::Update(float dt)
 {
 	// update debug object
-	debug.Update(dt);
+	data->debug.Update(dt);
 
 	// process map scroll
 	if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && data->window.hasFocus())
@@ -62,15 +73,20 @@ void GameState::Update(float dt)
 		// if mouse released, reset time back to 0
 		LPressTime = 0.0f;
 	}
+
+	// At the end, call update function on map which makes sure everything will be displayed correctly
+	world.UpdateView();
 }
 
 void GameState::Draw(float dt)
 {
 	data->window.clear(backgroundColor);
-
+	// set map view for drawing all the things in the world
+	data->window.setView(mapView);
 	world.Draw();
-
-	if (data->settings.GetShowFPS()) debug.DrawFPS(data->window);
+	// set generic view for drawing UI
+	data->window.setView(data->window.getDefaultView());
+	if (data->settings.GetShowFPS()) data->debug.DrawFPS(data->window);
 
 	data->window.display();
 }
