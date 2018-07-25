@@ -22,5 +22,3 @@
 #define SPLASH_SCENE_BACKGROUD_FILEPATH "Resources/Images/Splash Background.png"
 
 #define MAIN_MENU_TITLE_PATH "Resources/Images/Game Title.png"
-
-#define MAIN_MENU_BUTTON_PATH "Resources/Textures/mainMenuButton.png"
