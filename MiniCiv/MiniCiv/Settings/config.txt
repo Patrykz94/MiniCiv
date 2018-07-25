@@ -1,9 +1,0 @@
-// Map Options
-[Map Size]
-Normal
-[Map Width]
-0
-[Map Height]
-0
-[Map Wrapping]
-TRUE
